@@ -1,0 +1,60 @@
+appId: ${APP_ID}
+name: Recovery - a session killed mid-way offers "Resume your session" inline
+tags:
+  - smoke
+---
+- runFlow: subflows/launch.yaml
+- runFlow: subflows/fade-off.yaml
+- tapOn:
+    id: pattern-line
+- tapOn:
+    id: duration-5
+- tapOn:
+    id: pattern-slow
+- assertVisible: "Slow · 5 min"
+- tapOn:
+    id: start
+- extendedWaitUntil:
+    visible:
+      id: phase-label
+    timeout: 5000
+# Kill the app mid-session (no chance to save anything on the way out).
+- stopApp
+- runFlow: subflows/launch.yaml
+- assertVisible:
+    id: resume-session
+- tapOn:
+    id: resume-session
+- extendedWaitUntil:
+    visible:
+      id: phase-label
+    timeout: 5000
+- tapOn:
+    id: phase-label
+- assertVisible:
+    id: end
+- tapOn:
+    id: end
+# The recovered session counts the time the app was gone, so it may have passed the 20 s save threshold.
+- runFlow:
+    when:
+      visible:
+        id: done
+    commands:
+      - tapOn:
+          id: done
+- assertVisible:
+    id: pattern-line
+# Ending it clears the record: no resume line after a restart.
+- stopApp
+- runFlow: subflows/launch.yaml
+- assertNotVisible:
+    id: resume-session
+# Restore the default length for later flows.
+- tapOn:
+    id: pattern-line
+- tapOn:
+    id: duration-3
+- tapOn:
+    id: pattern-slow
+- assertVisible: "Slow · 3 min"

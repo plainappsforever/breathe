@@ -1,0 +1,148 @@
+appId: ${APP_ID}
+name: Android reminder actions - test reminder, Snooze, Skip today, Start opens a session
+# Android only: drives the real notification shade with the app in the background (the headless action path).
+# Keep the screen on while it runs (adb -s <serial> shell svc power stayon true).
+tags:
+  - android-only
+---
+- pressKey: back
+# Start from an empty shade so an old notification cannot be matched instead of the fresh one.
+- swipe:
+    start: 50%, 1%
+    end: 50%, 75%
+- scrollUntilVisible:
+    element:
+      text: "Clear all"
+    timeout: 5000
+    optional: true
+- tapOn:
+    text: "Clear all"
+    optional: true
+- pressKey: back
+- runFlow: subflows/launch.yaml
+- runFlow: subflows/fade-off.yaml
+- tapOn:
+    id: open-settings
+- scrollUntilVisible:
+    element:
+      id: open-reminders
+- tapOn:
+    id: open-reminders
+# Absolute precondition: exactly one reminder (disabled, so it never fires during the test).
+- repeat:
+    while:
+      notVisible:
+        id: reminders-empty
+    commands:
+      - tapOn:
+          id: "reminder-[0-9]+"
+      - scrollUntilVisible:
+          element:
+            id: reminder-delete
+      - tapOn:
+          id: reminder-delete
+- tapOn:
+    id: add-reminder
+- tapOn:
+    text: "Allow"
+    optional: true
+- tapOn:
+    id: "reminder-enabled-[0-9]+"
+- scrollUntilVisible:
+    element:
+      id: test-reminder
+- tapOn:
+    id: test-reminder
+
+# Leave the app (background), open the shade, wait for the reminder.
+- pressKey: home
+- swipe:
+    start: 50%, 1%
+    end: 50%, 75%
+- extendedWaitUntil:
+    visible: "Time to breathe"
+    timeout: 20000
+- assertVisible: "Snooze 10 min"
+- assertVisible: "Skip today"
+- assertVisible: "Start"
+
+# 1. Snooze: answered in the shade, the app does not open, and a snooze is pending.
+- tapOn: "Snooze 10 min"
+- assertNotVisible: "Time to breathe"
+- pressKey: back
+- launchApp:
+    stopApp: false
+- tapOn:
+    id: back
+- tapOn:
+    id: open-reminders
+- assertVisible: "scheduled: 0 snoozed: 1.*"
+
+# 2. A second reminder, "Skip today": clears it and stops the snooze.
+- scrollUntilVisible:
+    element:
+      id: test-reminder
+- tapOn:
+    id: test-reminder
+- pressKey: home
+- swipe:
+    start: 50%, 1%
+    end: 50%, 75%
+- extendedWaitUntil:
+    visible: "Time to breathe"
+    timeout: 20000
+- tapOn: "Skip today"
+- assertNotVisible: "Time to breathe"
+- pressKey: back
+- launchApp:
+    stopApp: false
+- tapOn:
+    id: back
+- tapOn:
+    id: open-reminders
+- assertVisible: "scheduled: 0 snoozed: 0.*"
+
+# 3. Tapping the reminder starts a session through the launch intent.
+- scrollUntilVisible:
+    element:
+      id: test-reminder
+- tapOn:
+    id: test-reminder
+- pressKey: home
+- swipe:
+    start: 50%, 1%
+    end: 50%, 75%
+- extendedWaitUntil:
+    visible: "Time to breathe"
+    timeout: 20000
+- tapOn: "A short pause.*"
+- extendedWaitUntil:
+    visible:
+      id: phase-label
+    timeout: 15000
+- tapOn:
+    id: phase-label
+- tapOn:
+    id: end
+
+# Clean up: no reminder left behind.
+- extendedWaitUntil:
+    visible:
+      id: home-screen
+    timeout: 10000
+- tapOn:
+    id: open-settings
+- scrollUntilVisible:
+    element:
+      id: open-reminders
+- tapOn:
+    id: open-reminders
+- tapOn:
+    id: "reminder-[0-9]+"
+- scrollUntilVisible:
+    element:
+      id: reminder-delete
+- tapOn:
+    id: reminder-delete
+- assertVisible:
+    id: reminders-empty

@@ -1,0 +1,142 @@
+appId: ${APP_ID}
+name: Reminders - none by default, the permission is asked when the first one is added, edit, disable, delete, survives restart
+tags:
+  - smoke
+---
+# Maestro grants every permission at launch by default; leave notifications undecided so the real prompt shows.
+- launchApp:
+    stopApp: true
+    permissions:
+      notifications: unset
+- extendedWaitUntil:
+    visible:
+      id: home-screen
+    timeout: 90000
+# Launching, and Home itself, never ask for anything.
+- assertNotVisible: "Allow"
+- assertNotVisible: "Don.t Allow"
+- tapOn:
+    id: open-settings
+- scrollUntilVisible:
+    element:
+      id: open-reminders
+- tapOn:
+    id: open-reminders
+- assertVisible:
+    id: reminders-screen
+
+# Absolute precondition: no reminder exists (earlier runs may have left one).
+- repeat:
+    while:
+      notVisible:
+        id: reminders-empty
+    commands:
+      - tapOn:
+          id: "reminder-[0-9]+"
+      - scrollUntilVisible:
+          element:
+            id: reminder-delete
+      - tapOn:
+          id: reminder-delete
+- assertVisible:
+    id: reminders-empty
+- assertVisible:
+    id: add-reminder
+- assertNotVisible:
+    id: perm-banner
+- assertVisible: "scheduled: 0 snoozed: 0.*"
+
+# The first reminder is the moment the phone asks for the notification permission.
+- tapOn:
+    id: add-reminder
+# Optional only because iOS cannot reset a granted notification permission between runs (Android always shows it).
+- extendedWaitUntil:
+    visible: "Allow"
+    timeout: 6000
+    optional: true
+- tapOn:
+    text: "Allow"
+    optional: true
+- assertVisible: "08:00, Every day, Default pattern"
+- assertNotVisible:
+    id: perm-banner
+- assertVisible: "scheduled: 1 snoozed: 0.*"
+
+# Time: hour +1, minutes +5 +5 -1 => 09:09.
+- tapOn:
+    id: hour-plus
+- tapOn:
+    id: minute-plus5
+- tapOn:
+    id: minute-plus5
+- tapOn:
+    id: minute-minus1
+- assertVisible: "09:09, Every day, Default pattern"
+
+# Days: drop Sunday and Saturday => Weekdays (5 weekly triggers).
+- tapOn:
+    id: weekday-1
+- tapOn:
+    id: weekday-7
+- assertVisible: "09:09, Weekdays, Default pattern"
+- assertVisible: "scheduled: 5 snoozed: 0.*"
+
+# Pattern.
+- scrollUntilVisible:
+    element:
+      id: pattern-box
+- tapOn:
+    id: pattern-box
+- scrollUntilVisible:
+    element:
+      id: reminder-delete
+- assertVisible: "09:09, Weekdays, Box"
+
+# Disable: nothing stays scheduled.
+- scrollUntilVisible:
+    element:
+      id: "reminder-enabled-[0-9]+"
+    direction: UP
+- tapOn:
+    id: "reminder-enabled-[0-9]+"
+- scrollUntilVisible:
+    element:
+      id: scheduled-count
+    direction: UP
+- assertVisible: "scheduled: 0 snoozed: 0.*"
+- tapOn:
+    id: "reminder-enabled-[0-9]+"
+- scrollUntilVisible:
+    element:
+      id: scheduled-count
+    direction: UP
+- assertVisible: "scheduled: 5 snoozed: 0.*"
+
+# It is still there after leaving the app and coming back.
+- stopApp
+- runFlow: subflows/launch.yaml
+- tapOn:
+    id: open-settings
+- scrollUntilVisible:
+    element:
+      id: open-reminders
+- tapOn:
+    id: open-reminders
+- assertVisible: "09:09, Weekdays, Box"
+- assertVisible: "scheduled: 5 snoozed: 0.*"
+
+# Delete leaves none, and none scheduled.
+- tapOn:
+    id: "reminder-[0-9]+"
+- scrollUntilVisible:
+    element:
+      id: reminder-delete
+- tapOn:
+    id: reminder-delete
+- assertVisible:
+    id: reminders-empty
+- scrollUntilVisible:
+    element:
+      id: scheduled-count
+    direction: UP
+- assertVisible: "scheduled: 0 snoozed: 0.*"

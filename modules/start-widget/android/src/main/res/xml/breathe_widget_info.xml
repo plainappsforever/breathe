@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- v3 P7.3. updatePeriodMillis 0: the app pushes "minutes today" when a session is saved or the app goes to
+     the background, and a non-waking alarm redraws at local midnight (StartWidgetProvider). -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:description="@string/breathe_widget_description"
+    android:initialLayout="@layout/breathe_widget"
+    android:previewLayout="@layout/breathe_widget"
+    android:minWidth="110dp"
+    android:minHeight="110dp"
+    android:minResizeWidth="110dp"
+    android:minResizeHeight="50dp"
+    android:resizeMode="horizontal|vertical"
+    android:targetCellWidth="2"
+    android:targetCellHeight="2"
+    android:updatePeriodMillis="0"
+    android:widgetCategory="home_screen"
+    tools:targetApi="31" />

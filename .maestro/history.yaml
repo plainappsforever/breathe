@@ -1,0 +1,242 @@
+appId: ${APP_ID}
+name: History - stats, mood check-in, milestones, notes and tags, filters, repeat, delete one session
+tags:
+  - smoke
+---
+- runFlow: subflows/launch.yaml
+- evalScript: ${output.stamp = 'n' + Date.now()}
+
+# Absolute preconditions: mood check-in and milestones on (they default off).
+- tapOn:
+    id: open-settings
+- scrollUntilVisible:
+    element:
+      id: toggle-mood
+- runFlow:
+    when:
+      visible:
+        id: toggle-mood
+        checked: false
+    commands:
+      - tapOn:
+          id: toggle-mood
+- scrollUntilVisible:
+    element:
+      id: toggle-milestones
+- runFlow:
+    when:
+      visible:
+        id: toggle-milestones
+        checked: false
+    commands:
+      - tapOn:
+          id: toggle-milestones
+- assertVisible:
+    id: toggle-mood
+    checked: true
+- assertVisible:
+    id: toggle-milestones
+    checked: true
+- scrollUntilVisible:
+    direction: UP
+    element:
+      id: back
+- tapOn:
+    id: back
+- assertVisible:
+    id: home-screen
+
+# Session 1: Slow, 2 breaths (20 s), mood 3 before and 4 after.
+- tapOn:
+    id: mood-before-3
+- openLink: ${APP_SCHEME}://start?pattern=slow&target=b:2
+- runFlow:
+    when:
+      visible: "Open"
+    commands:
+      - tapOn: "Open"
+- extendedWaitUntil:
+    visible:
+      id: end-screen
+    timeout: 60000
+- assertVisible: "How do you feel now? (optional)"
+- tapOn:
+    id: mood-after-4
+- tapOn:
+    id: done
+- assertVisible:
+    id: home-screen
+
+# Session 2: Box, 2 breaths (32 s), no mood answers (skipped).
+- openLink: ${APP_SCHEME}://start?pattern=box&target=b:2
+- runFlow:
+    when:
+      visible: "Open"
+    commands:
+      - tapOn: "Open"
+- extendedWaitUntil:
+    visible:
+      id: end-screen
+    timeout: 60000
+- tapOn:
+    id: done
+- assertVisible:
+    id: home-screen
+
+# History: summary cards, charts, milestones.
+- tapOn:
+    id: open-settings
+- scrollUntilVisible:
+    element:
+      id: open-history
+- tapOn:
+    id: open-history
+- assertVisible:
+    id: history-screen
+- assertVisible:
+    id: totals
+- tapOn:
+    id: period-all
+- assertVisible:
+    id: totals
+- assertVisible: "Last 7 days"
+- assertVisible: "Most used"
+- assertVisible:
+    id: heatmap
+- scrollUntilVisible:
+    element:
+      id: bars
+- assertVisible:
+    id: bars
+- scrollUntilVisible:
+    element:
+      id: milestones
+- assertVisible:
+    id: milestones
+- assertVisible: "First session"
+- scrollUntilVisible:
+    element: ".*Mood 3 → 4.*"
+
+# Session detail: note and tags.
+- scrollUntilVisible:
+    element: ".*Mood 3 → 4.*"
+- tapOn: ".*Mood 3 → 4.*"
+- assertVisible:
+    id: session-screen
+- assertVisible:
+    id: mood-line
+- tapOn:
+    id: note-input
+- inputText: "calm ${output.stamp}"
+- tapOn:
+    id: tags-input
+- inputText: "t${output.stamp}"
+- tapOn:
+    id: tags-label
+- tapOn:
+    id: save-note
+- assertVisible: "Saved"
+- tapOn:
+    id: back
+- assertVisible:
+    id: history-screen
+- scrollUntilVisible:
+    element: "#t${output.stamp}"
+- scrollUntilVisible:
+    direction: UP
+    element:
+      id: filter-tag-t${output.stamp}
+- tapOn:
+    id: filter-tag-t${output.stamp}
+- assertVisible:
+    id: filter-count
+- assertVisible: "1 of .* sessions"
+- tapOn:
+    id: filter-clear
+- scrollUntilVisible:
+    direction: UP
+    element:
+      id: history-search
+- tapOn:
+    id: history-search
+- inputText: "calm ${output.stamp}"
+- tapOn: "Sessions"
+- assertVisible: "1 of .* sessions"
+- tapOn:
+    id: filter-clear
+- scrollUntilVisible:
+    direction: UP
+    element:
+      id: filter-pattern-box
+- tapOn:
+    id: filter-pattern-box
+- assertVisible:
+    id: filter-count
+- tapOn:
+    id: filter-clear
+
+# Repeat this session: opens Home and starts the same pattern and length (Slow, 2 breaths).
+- scrollUntilVisible:
+    element: ".*Mood 3 → 4.*"
+- tapOn: ".*Mood 3 → 4.*"
+- tapOn:
+    id: repeat-session
+- extendedWaitUntil:
+    visible:
+      id: phase-label
+    timeout: 10000
+- extendedWaitUntil:
+    visible:
+      id: end-screen
+    timeout: 60000
+- assertVisible: "20 s · 2 breaths"
+- tapOn:
+    id: done
+
+# Delete one session (second tap confirms).
+- tapOn:
+    id: open-settings
+- scrollUntilVisible:
+    element:
+      id: open-history
+- tapOn:
+    id: open-history
+- scrollUntilVisible:
+    element: ".*Mood 3 → 4.*"
+- tapOn: ".*Mood 3 → 4.*"
+- scrollUntilVisible:
+    element:
+      id: delete-session
+- tapOn:
+    id: delete-session
+- assertVisible: "Tap again to delete this session"
+- tapOn:
+    id: delete-session
+- assertVisible:
+    id: history-screen
+
+# Leave the optional features off, as they are by default.
+- tapOn:
+    id: back
+- scrollUntilVisible:
+    element:
+      id: toggle-mood
+- runFlow:
+    when:
+      visible:
+        id: toggle-mood
+        checked: true
+    commands:
+      - tapOn:
+          id: toggle-mood
+- scrollUntilVisible:
+    element:
+      id: toggle-milestones
+- runFlow:
+    when:
+      visible:
+        id: toggle-milestones
+        checked: true
+    commands:
+      - tapOn:
+          id: toggle-milestones

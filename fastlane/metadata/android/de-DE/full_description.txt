@@ -1,0 +1,38 @@
+App öffnen, einmal tippen, atmen. Breathe Well führt langsames, getaktetes Atmen mit sanften Tönen und Vibration, damit du die Augen schließen und nach Gefühl und Gehör mitatmen kannst.
+
+Kein Konto. Keine Werbung. Kein Abo. Keine Spendenaufforderungen. Funktioniert offline. Vor, während und nach einer Sitzung wird dir nichts verkauft oder abverlangt.
+
+ATMEN
+• Zwölf Muster: Slow, Sigh, Even, Box, 4-7-8, Long exhale, drei Resonance-Tempi, Triangle, Easy box und Short sigh, dazu deine eigene Bibliothek eigener Muster. Suche, Favoriten und zuletzt benutzte Muster.
+• Dauer in Minuten (bis 60), Anzahl der Atemzüge oder offen. „Nach diesem Atemzug beenden“ und ein optionaler Countdown zum Bereitmachen.
+• Führung durch Vibration und Töne, mit Stärkeregler, Lautstärke, vier Endklängen und vier Darstellungen (Kugel, Ring, Balken, Text). Der Bildschirm blendet ins Dunkel aus, damit du die Augen geschlossen halten kannst. Geräte ohne fein steuerbare Vibration geben pro Phase einen einfachen Tipp.
+• Optional „Weiterführen bei gesperrtem Gerät“: ein kleiner eingebauter Taktgeber hält jeden Ton und jedes Brummen bei ausgeschaltetem Bildschirm pünktlich, mit Benachrichtigung (Pause, Ende), Unterstützung der Kopfhörertaste und Pause bei einem Anruf (Android 12 und neuer).
+• Optional: Schütteln zum Pausieren.
+• Keine schnellen, erzwungenen oder Atemanhalte-Techniken. Muster mit Atemanhalten sind gekennzeichnet und tragen einen Hinweis.
+
+WISSEN, WAS DU TUST
+Zu jedem Muster gibt es eine Seite „Über dieses Muster“: was es ist, welche Studien es gibt und was nicht bekannt ist. Für manche Muster gibt es keine eigene Studie, und die Seite sagt das.
+
+SCHNELLER STARTEN
+• Schnelleinstellungs-Kachel und Startbildschirm-Widget (Minuten heute, ein Tipp zum Starten).
+• App-Symbol lange drücken: „Breathe now“ und deine zwei zuletzt benutzten Muster.
+• Jede Automatisierungs-App, die einen Link öffnen kann, startet eine Sitzung: breathe://start?pattern=box&target=m:5
+
+DEIN VERLAUF BLEIBT BEI DIR
+• Summen, ein 12-Wochen-Kalender, die letzten 14 Tage, Notizen, Schlagwörter und eine optionale Stimmungsabfrage.
+• Export als CSV oder JSON, Sicherung und Wiederherstellung, Löschen eines Zeitraums oder von allem.
+• Optionale Fingerabdruck- oder Gesichtssperre für den Verlauf.
+
+ERINNERUNGEN (OPTIONAL)
+Standardmäßig keine. Bis zu acht, jede mit eigener Uhrzeit, Wochentagen und eigenem Muster, mit Start, Später erinnern und Heute überspringen. Android kann Erinnerungen bis zu eine Stunde verspätet zustellen, solange du „Wecker & Erinnerungen“ nicht erlaubst; die App sagt dir das und verlinkt die Einstellung.
+
+HEALTH CONNECT (OPTIONAL)
+Wenn du es in den Einstellungen einschaltest, wird jede gespeicherte Sitzung ab 20 Sekunden als Atem-Achtsamkeitssitzung in Health Connect geschrieben. Nur Schreiben: Breathe Well liest deine Health-Connect-Daten nie und verwendet sie für nichts anderes. Standardmäßig aus; Android fragt im Moment des Einschaltens nach der Berechtigung; das Löschen einer Sitzung in der App entfernt sie nicht aus Health Connect. Health Connect ist Teil von Android 14 und neuer und eine App aus Google Play unter Android 8 bis 13.
+
+DATENSCHUTZ
+Alle Daten bleiben auf deinem Handy. Kein Konto, keine Analyse, kein Tracking, keine Werbung. Die App selbst stellt keine Netzwerkanfragen.
+
+WICHTIG
+Breathe Well dient nur der Entspannung. Es ist ein allgemeines Wohlfühl-Werkzeug, kein Medizinprodukt, und stellt keine Diagnose, behandelt, heilt oder verhindert keine Erkrankung. Wenn du schwanger bist, eine Herz- oder Lungenerkrankung hast oder schon einmal ohnmächtig geworden bist, sprich zuerst mit einer Ärztin oder einem Arzt, lass Atemanhalte aus und hör auf, wenn dir schwindelig wird. Nicht beim Autofahren, Radfahren, Schwimmen oder in der Badewanne verwenden.
+
+Benötigt Android 8.0 oder neuer. Die App ist auf Englisch.

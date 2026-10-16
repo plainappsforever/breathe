@@ -1,0 +1,17 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <application>
+    <!-- v3 P7.3: "Breathe" home-screen widget (start button + minutes today). The app pushes today's minutes;
+         the widget redraws itself at local midnight (non-waking alarm), so it never needs updatePeriodMillis. -->
+    <receiver
+      android:name="expo.modules.startwidget.StartWidgetProvider"
+      android:exported="false"
+      android:label="@string/breathe_widget_label">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/breathe_widget_info" />
+    </receiver>
+  </application>
+</manifest>

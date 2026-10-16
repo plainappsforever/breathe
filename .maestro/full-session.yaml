@@ -1,0 +1,41 @@
+appId: ${APP_ID}
+name: Full session - runs to completion and appears in History
+tags:
+  - smoke
+---
+- runFlow: subflows/launch.yaml
+- tapOn:
+    id: pattern-line
+- assertVisible:
+    id: patterns-sheet
+- tapOn:
+    id: duration-1
+- tapOn:
+    id: pattern-slow
+- assertVisible:
+    id: home-screen
+- assertVisible: "Slow · 1 min"
+- tapOn:
+    id: start
+- extendedWaitUntil:
+    visible:
+      id: end-screen
+    timeout: 65000
+- assertVisible: "1 min · 6 breaths"
+- tapOn:
+    id: done
+- assertVisible:
+    id: home-screen
+- tapOn:
+    id: open-settings
+- scrollUntilVisible:
+    element:
+      id: open-history
+- tapOn:
+    id: open-history
+- assertVisible:
+    id: history-screen
+# The session list sits below the summary cards and charts.
+- scrollUntilVisible:
+    element: "Slow.*"
+- assertVisible: "Slow.*"

@@ -1,0 +1,99 @@
+appId: ${APP_ID}
+name: Custom library - create, rename, duplicate, delete, persists across restart
+tags:
+  - smoke
+---
+- runFlow: subflows/launch.yaml
+
+# Create "Lib test" (3.5 in / 6 out).
+- tapOn:
+    id: pattern-line
+- scrollUntilVisible:
+    element:
+      id: pattern-custom
+- tapOn:
+    id: pattern-custom
+- assertVisible:
+    id: custom-screen
+- tapOn:
+    id: custom-name
+- eraseText: 20
+- inputText: "Lib test"
+- hideKeyboard
+- tapOn:
+    id: stepper-in-decrease
+- tapOn:
+    id: save-custom
+- assertVisible:
+    id: pattern-line
+- assertVisible: "Lib test · .*"
+
+# It is in the list and survives a restart.
+- stopApp
+- runFlow: subflows/launch.yaml
+- tapOn:
+    id: pattern-line
+- scrollUntilVisible:
+    element:
+      text: "Lib test.*"
+
+# Rename.
+- scrollUntilVisible:
+    element:
+      text: "Edit Lib test"
+- tapOn: "Edit Lib test"
+- tapOn:
+    id: custom-name
+- eraseText: 20
+- inputText: "Lib renamed"
+- hideKeyboard
+- tapOn:
+    id: save-custom
+- scrollUntilVisible:
+    element:
+      text: "Lib renamed(?! copy).*"
+- assertNotVisible: "Lib test.*"
+
+# Duplicate.
+- scrollUntilVisible:
+    element:
+      text: "Edit Lib renamed"
+- tapOn: "Edit Lib renamed"
+- tapOn:
+    id: duplicate-custom
+- scrollUntilVisible:
+    element:
+      text: "Lib renamed copy.*"
+
+# Delete the copy (needs a second tap), then the original.
+- scrollUntilVisible:
+    element:
+      text: "Edit Lib renamed copy"
+- tapOn: "Edit Lib renamed copy"
+- tapOn:
+    id: delete-custom
+- assertVisible: "Tap again to delete"
+- tapOn:
+    id: delete-custom
+- assertNotVisible: "Lib renamed copy.*"
+- scrollUntilVisible:
+    element:
+      text: "Lib renamed(?! copy).*"
+- scrollUntilVisible:
+    element:
+      text: "Edit Lib renamed"
+- tapOn: "Edit Lib renamed"
+- tapOn:
+    id: delete-custom
+- tapOn:
+    id: delete-custom
+- assertNotVisible: "Lib renamed.*"
+
+# Back to a known state: Slow, 3 min.
+- scrollUntilVisible:
+    direction: UP
+    element:
+      id: pattern-slow
+- tapOn:
+    id: pattern-slow
+- assertVisible: "Slow · .*"

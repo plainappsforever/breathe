@@ -1,0 +1,147 @@
+appId: ${APP_ID}
+name: Live Activity - opt-in setting, countdown on the Lock Screen, paused, ends with the session
+tags:
+  - ios-only
+# iOS 16.2+ with the widget extension (default build). The first Live Activity makes iOS ask "Allow Live
+# Activities from ...?" on the Lock Screen (only after the setting was turned on); the flow allows it.
+# Notification Center (swipe down from the top left) shows the Lock Screen presentation.
+---
+- runFlow: subflows/launch.yaml
+- runFlow: subflows/fade-off.yaml
+- tapOn:
+    id: open-settings
+- scrollUntilVisible:
+    element:
+      id: toggle-live-activity
+- runFlow:
+    when:
+      visible:
+        id: toggle-live-activity
+        checked: false
+    commands:
+      - tapOn:
+          id: toggle-live-activity
+- assertVisible:
+    id: toggle-live-activity
+    checked: true
+# v3.1 (D59): without "Keep guiding when locked", leaving the app pauses the session, so the running state on
+# the Lock Screen is checked with it on.
+- runFlow:
+    when:
+      visible:
+        id: toggle-lock-guidance
+        checked: false
+    commands:
+      - tapOn:
+          id: toggle-lock-guidance
+- assertVisible:
+    id: toggle-lock-guidance
+    checked: true
+- tapOn:
+    id: back
+- tapOn:
+    id: pattern-line
+- tapOn:
+    id: duration-3
+- scrollUntilVisible:
+    element:
+      id: pattern-slow
+- tapOn:
+    id: pattern-slow
+- tapOn:
+    id: start
+- extendedWaitUntil:
+    visible:
+      id: phase-label
+    timeout: 15000
+
+# Running: pattern name, the length and a countdown.
+- pressKey: Home
+- waitForAnimationToEnd
+- swipe:
+    start: 20%,1%
+    end: 20%,60%
+- waitForAnimationToEnd
+- runFlow:
+    when:
+      visible: "Allow"
+    commands:
+      - tapOn: "Allow"
+- assertVisible: "Slow"
+- assertVisible: "3 min"
+- assertVisible: "[0-9]:[0-5][0-9]"
+- swipe:
+    start: 50%,95%
+    end: 50%,30%
+- waitForAnimationToEnd
+
+# Paused: "Paused" and a still clock.
+- launchApp:
+    stopApp: false
+- tapOn:
+    id: phase-label
+- assertVisible:
+    id: resume
+- pressKey: Home
+- waitForAnimationToEnd
+- swipe:
+    start: 20%,1%
+    end: 20%,60%
+- waitForAnimationToEnd
+- assertVisible: "Paused"
+- swipe:
+    start: 50%,95%
+    end: 50%,30%
+- waitForAnimationToEnd
+
+# Ended: gone.
+- launchApp:
+    stopApp: false
+- tapOn:
+    id: end
+- pressKey: Home
+- waitForAnimationToEnd
+- swipe:
+    start: 20%,1%
+    end: 20%,60%
+- waitForAnimationToEnd
+- assertNotVisible: "Paused"
+- assertNotVisible: "3 min"
+- swipe:
+    start: 50%,95%
+    end: 50%,30%
+- waitForAnimationToEnd
+
+# Leave the setting off (its default) for the other flows.
+- launchApp:
+    stopApp: false
+- runFlow:
+    when:
+      visible:
+        id: done
+    commands:
+      - tapOn:
+          id: done
+- tapOn:
+    id: open-settings
+- scrollUntilVisible:
+    element:
+      id: toggle-live-activity
+- tapOn:
+    id: toggle-live-activity
+- assertVisible:
+    id: toggle-live-activity
+    checked: false
+- runFlow:
+    when:
+      visible:
+        id: toggle-lock-guidance
+        checked: true
+    commands:
+      - tapOn:
+          id: toggle-lock-guidance
+- assertVisible:
+    id: toggle-lock-guidance
+    checked: false
+- tapOn:
+    id: back

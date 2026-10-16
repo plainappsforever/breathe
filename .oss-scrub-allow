@@ -1,0 +1,13 @@
+# .oss-scrub-allow - findings of scripts/oss/scrub-check.sh that a human checked and accepts (public file, no values).
+# Reviewed 2026-10-16 for the first public source release.
+P-EMAIL src/lib/privacy-policy.ts        # the app's public privacy contact (old project address, shown in the app)
+P-PKGID .maestro/manual/countdown-lock.yaml                                                # placeholder app id com.tim.*: the identifier changes before the first store release
+P-PKGID .maestro/manual/ios-quick-actions.yaml                                             # placeholder app id com.tim.*: the identifier changes before the first store release
+P-PKGID .maestro/manual/lock-restore.yaml                                                  # placeholder app id com.tim.*: the identifier changes before the first store release
+P-PKGID .maestro/quick-tile.yaml                                                           # placeholder app id com.tim.*: the identifier changes before the first store release
+P-PKGID README.md                                                                          # placeholder app id com.tim.*: the identifier changes before the first store release
+P-PKGID app.config.ts                                                                      # placeholder app id com.tim.*: the identifier changes before the first store release
+P-PKGID fdroid/*                                                                           # placeholder app id com.tim.*: the identifier changes before the first store release
+P-PKGID modules/quick-tile/android/src/main/java/expo/modules/quicktile/LaunchLink.kt      # placeholder app id com.tim.*: the identifier changes before the first store release
+P-PKGID modules/start-widget/android/src/main/java/expo/modules/startwidget/LaunchLink.kt  # placeholder app id com.tim.*: the identifier changes before the first store release
+P-PKGID plugins/with-launch-scheme.js                                                      # placeholder app id com.tim.*: the identifier changes before the first store release

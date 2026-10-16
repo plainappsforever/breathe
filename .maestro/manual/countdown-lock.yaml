@@ -1,0 +1,29 @@
+appId: ${APP_ID}
+name: Countdown + lock (Android) - locked mode on, 10 s get-ready, the phone locked during the countdown
+---
+# Run by hand (v3.1 F4, REVIEW_V3 #5); Maestro cannot read logcat. Steps:
+#   adb -s <serial> logcat -c
+#   maestro --device <serial> test -e APP_ID=com.tim.breathe.dev .maestro/manual/countdown-lock.yaml
+#   adb -s <serial> shell input keyevent KEYCODE_POWER        # at once, during the countdown
+#   (wait 30 s)  adb -s <serial> logcat -d | grep SessionRunner
+# Healthy: "start ... elapsedMs=-10000" (the countdown is a lead-in), then "cue n=1 kind=inhale nominalMs=0" about
+# 10 s later with screenOn=false and single-digit lateMs. Afterwards set the countdown back to Off and the toggle off.
+- runFlow: ../subflows/launch.yaml
+- tapOn:
+    id: open-settings
+- tapOn:
+    id: prep-10
+- runFlow:
+    when:
+      visible:
+        id: toggle-lock-guidance
+        checked: false
+    commands:
+      - tapOn:
+          id: toggle-lock-guidance
+- tapOn:
+    id: back
+- tapOn:
+    id: start
+- assertVisible:
+    id: prep-count

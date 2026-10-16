@@ -1,0 +1,73 @@
+appId: ${APP_ID}
+name: History lock on - restoring a backup through the system file picker keeps the restore question (Android)
+---
+# Run by hand (not in the suite): it needs a device PIN and a backup file on the phone. Before:
+#   adb -s <serial> shell locksettings set-pin 1234
+#   adb -s <serial> push <a backup .json named breathe-lock-test-backup.json> /sdcard/Download/
+# Run: maestro --device <serial> test -e APP_ID=com.tim.breathe.dev .maestro/manual/lock-restore.yaml
+# After: switch the History lock off in Settings (PIN 1234), then
+#   adb -s <serial> shell locksettings clear --old 1234 ; adb -s <serial> shell rm /sdcard/Download/breathe-lock-test-backup.json
+# v3.1 F4 probe (REVIEW_V3 #10): History lock on (device PIN), Data > Restore opens the system picker, which sends
+# the app to the background; choosing the file must come back to the restore question, not a locked screen.
+- runFlow: ../subflows/launch.yaml
+- tapOn:
+    id: open-settings
+- scrollUntilVisible:
+    element:
+      id: toggle-history-lock
+- runFlow:
+    when:
+      visible:
+        id: toggle-history-lock
+        checked: false
+    commands:
+      - tapOn:
+          id: toggle-history-lock
+      - inputText: "1234"
+      - pressKey: Enter
+- assertVisible:
+    id: toggle-history-lock
+    checked: true
+- scrollUntilVisible:
+    element:
+      id: open-data-settings
+- tapOn:
+    id: open-data-settings
+- runFlow:
+    when:
+      notVisible:
+        id: data-screen
+    commands:
+      - inputText: "1234"
+      - pressKey: Enter
+- extendedWaitUntil:
+    visible:
+      id: data-screen
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: restore
+- tapOn:
+    id: restore
+- extendedWaitUntil:
+    visible: "breathe-lock-test-backup.json"
+    timeout: 10000
+    optional: true
+- runFlow:
+    when:
+      notVisible: "breathe-lock-test-backup.json"
+    commands:
+      - tapOn:
+          text: "Downloads"
+          optional: true
+- tapOn: "breathe-lock-test-backup.json"
+- extendedWaitUntil:
+    visible:
+      id: restore-confirm-box
+    timeout: 10000
+- assertNotVisible:
+    id: history-locked
+- tapOn:
+    id: restore-cancel
+- tapOn:
+    id: back

@@ -1,0 +1,30 @@
+# Flows share one simulator and one database, so run them sequentially in this order (by flow name).
+# Each flow sets any pattern/duration it depends on explicitly rather than relying on a previous
+# flow's leftover state.
+flows:
+  - "*"
+executionOrder:
+  continueOnFailure: true
+  flowsOrder:
+    - "Session - one tap to breathing, pause, early end skips the end screen"
+    - "Full session - runs to completion and appears in History"
+    - "Patterns - choose a preset and duration, persists across restart"
+    - "Custom pattern - build one and start a session with it"
+    - "Settings - toggles persist across restart"
+    - "Targets - minutes to 60, breath counts, end after this breath, get-ready countdown"
+    - "Custom library - create, rename, duplicate, delete, persists across restart"
+    - "Deep link - breathe://start opens a session, params and defaults"
+    - "Recovery - a session killed mid-way offers \"Resume your session\" inline"
+    - "Experience - haptic strength, volume, end sound, fade delay, visuals, accent, text size, motion, shake"
+    - "Pattern overrides - a pattern's own fade to dark, haptics, sound and length"
+    - "Techniques - new patterns, search, favourites, About this pattern, safety and evidence pages"
+    - "History - stats, mood check-in, milestones, notes and tags, filters, repeat, delete one session"
+    - "Data - export, backup, date-range and full delete, History lock is off by default"
+    - "Reminders - none by default, the permission is asked when the first one is added, edit, disable, delete, survives restart"
+    - "Health - off by default, turning it on asks (or explains and stays off), a finished session is written"
+    - "Android reminder actions - test reminder, Snooze, Skip today, Start opens a session"
+    - "Quick actions - long-press the app icon, Breathe now and a recent pattern start a session"
+    - "Quick Settings tile - add it from Settings, one tap in Quick Settings starts the default session"
+    - "Home-screen widget - add it from Settings, minutes today, one tap starts the default session"
+    - "Live Activity - opt-in setting, countdown on the Lock Screen, paused, ends with the session"
+    - "Shortcut link - About explains Shortcuts and the Action Button, the shown link starts that session"

@@ -1,0 +1,74 @@
+appId: ${APP_ID}
+name: Quick Settings tile - add it from Settings, one tap in Quick Settings starts the default session
+tags:
+  - android-only
+# Android 13+. If the tile is already in Quick Settings, the system answers "already added" and no dialog
+# appears. To see the dialog again: adb -s <serial> shell cmd statusbar remove-tile \
+#   com.tim.breathe.dev/expo.modules.quicktile.BreatheTileService
+---
+- runFlow: subflows/launch.yaml
+- runFlow: subflows/fade-off.yaml
+- tapOn:
+    id: pattern-line
+- tapOn:
+    id: duration-3
+- scrollUntilVisible:
+    element:
+      id: pattern-slow
+- tapOn:
+    id: pattern-slow
+- assertVisible: "Slow · 3 min"
+- tapOn:
+    id: open-settings
+- scrollUntilVisible:
+    element:
+      id: add-tile
+    centerElement: true
+- assertVisible: "One tap in Quick Settings starts your usual session."
+- tapOn:
+    id: add-tile
+- runFlow:
+    when:
+      visible: "Add tile"
+    commands:
+      - tapOn: "Add tile"
+- extendedWaitUntil:
+    visible:
+      id: tile-note
+      text: "(Added|The Breathe tile is already).*"
+    timeout: 10000
+
+# Leave the app, open Quick Settings (two swipes down), tap the tile: the default session starts. Retried once:
+# on a loaded machine a tap can arrive as a long press, which opens App info instead.
+- retry:
+    maxRetries: 2
+    commands:
+      - pressKey: Home
+      - swipe:
+          start: 50%,1%
+          end: 50%,60%
+      - swipe:
+          start: 50%,1%
+          end: 50%,80%
+      # An added tile goes to the end of Quick Settings: page through until it shows.
+      - repeat:
+          times: 4
+          while:
+            notVisible: "Breathe"
+          commands:
+            - swipe:
+                start: 90%,35%
+                end: 10%,35%
+            - waitForAnimationToEnd
+      - tapOn:
+          text: "Breathe"
+          retryTapIfNoChange: false
+      - extendedWaitUntil:
+          visible:
+            id: phase-label
+          timeout: 20000
+- tapOn:
+    id: phase-label
+- tapOn:
+    id: end
+- assertVisible: "Slow · 3 min"

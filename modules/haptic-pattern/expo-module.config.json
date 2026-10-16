@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android", "web"],
+  "apple": {
+    "modules": ["HapticPatternModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.hapticpattern.HapticPatternModule"]
+  }
+}

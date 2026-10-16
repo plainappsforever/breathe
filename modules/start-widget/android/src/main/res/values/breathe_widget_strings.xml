@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="breathe_widget_label">Breathe</string>
+    <string name="breathe_widget_description">Start a session with one tap; shows your minutes today.</string>
+</resources>

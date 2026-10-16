@@ -1,0 +1,54 @@
+appId: ${APP_ID}
+name: Shortcut link - About explains Shortcuts and the Action Button, the shown link starts that session
+---
+# iOS Shortcuts ("Open URLs"), the Action Button and Android automation apps all open the same start link
+# (true App Intents and a Control Center control wait for SDK 58, V3_PLAN P7). openLink does what they do.
+- runFlow: subflows/launch.yaml
+- runFlow: subflows/fade-off.yaml
+- tapOn:
+    id: open-settings
+- scrollUntilVisible:
+    element:
+      id: open-about
+- tapOn:
+    id: open-about
+- scrollUntilVisible:
+    element:
+      id: shortcut-link-box-5
+    centerElement: true
+- assertVisible:
+    id: about-shortcuts
+- assertVisible:
+    id: shortcut-link-box-5
+    text: "Box, 5 minutes: .*://start\\?pattern=box&target=m:5"
+- assertVisible:
+    id: shortcut-link-default
+    text: "Your usual session: .*://start"
+
+- openLink: ${APP_SCHEME}://start?pattern=box&target=m:5
+- runFlow:
+    when:
+      visible: "Open"
+    commands:
+      - tapOn: "Open"
+- extendedWaitUntil:
+    visible:
+      id: phase-label
+    timeout: 15000
+- tapOn:
+    id: phase-label
+- tapOn:
+    id: end
+- assertVisible: "Box · 5 min"
+
+# Leave the default as the other flows expect it.
+- tapOn:
+    id: pattern-line
+- tapOn:
+    id: duration-3
+- scrollUntilVisible:
+    element:
+      id: pattern-slow
+- tapOn:
+    id: pattern-slow
+- assertVisible: "Slow · 3 min"

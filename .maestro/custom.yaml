@@ -1,0 +1,86 @@
+appId: ${APP_ID}
+name: Custom pattern - build one and start a session with it
+tags:
+  - smoke
+---
+- runFlow: subflows/launch.yaml
+# Fade to dark otherwise turns the later pause-tap into a wake-only tap (SPEC "any touch brings the
+# screen back"); make sure it's off so a single tap reliably pauses (absolute, not a relative toggle,
+# so this flow is correct regardless of another flow's leftover state).
+- tapOn:
+    id: open-settings
+- runFlow:
+    when:
+      visible:
+        id: toggle-fade
+        checked: true
+    commands:
+      - tapOn:
+          id: toggle-fade
+- tapOn:
+    id: back
+- assertVisible:
+    id: home-screen
+- tapOn:
+    id: pattern-line
+- assertVisible:
+    id: patterns-sheet
+- tapOn:
+    id: duration-3
+- scrollUntilVisible:
+    element:
+      id: pattern-custom
+- tapOn:
+    id: pattern-custom
+- assertVisible:
+    id: custom-screen
+- tapOn:
+    id: stepper-in-decrease
+- tapOn:
+    id: stepper-in-decrease
+- assertVisible: "3s"
+- tapOn:
+    id: stepper-out-decrease
+- tapOn:
+    id: stepper-out-decrease
+- assertVisible: "5s"
+- tapOn:
+    id: save-custom
+- assertVisible:
+    id: home-screen
+- assertVisible: "Custom · 3 min"
+- tapOn:
+    id: start
+- extendedWaitUntil:
+    visible:
+      id: phase-label
+    timeout: 5000
+- assertVisible: "In"
+- tapOn:
+    id: phase-label
+- assertVisible:
+    id: resume
+- assertVisible:
+    id: end
+- tapOn:
+    id: end
+- assertVisible:
+    id: home-screen
+# Tidy up: remove the pattern this flow created so repeated runs do not pile up Custom rows.
+- tapOn:
+    id: pattern-line
+- scrollUntilVisible:
+    element:
+      text: "Edit Custom"
+- tapOn: "Edit Custom"
+- tapOn:
+    id: delete-custom
+- tapOn:
+    id: delete-custom
+- scrollUntilVisible:
+    direction: UP
+    element:
+      id: pattern-slow
+- tapOn:
+    id: pattern-slow
+- assertVisible: "Slow · .*"

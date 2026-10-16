@@ -1,0 +1,21 @@
+appId: ${APP_ID}
+---
+# Android: long-press the app's icon in the Pixel launcher's all-apps list and pick the quick action ${ACTION}.
+# (iOS SpringBoard: see manual/ios-quick-actions.yaml.)
+- retry:
+    maxRetries: 2
+    commands:
+      - pressKey: Home
+      - waitForAnimationToEnd
+      - swipe:
+          start: 50%,80%
+          end: 50%,15%
+      - waitForAnimationToEnd
+      - scrollUntilVisible:
+          element: "Breathe Well Dev"
+          timeout: 20000
+      - longPressOn: "Breathe Well Dev"
+      - extendedWaitUntil:
+          visible: ${ACTION}
+          timeout: 8000
+- tapOn: ${ACTION}

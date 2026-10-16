@@ -1,0 +1,68 @@
+appId: ${APP_ID}
+name: Privacy policy - in-app policy from Settings, About and the privacy link
+tags:
+  - smoke
+---
+# v3.1 F2: the policy is inside the app (Apple 5.1.1, Play User Data) and is what Health Connect's "Read privacy
+# policy" opens on Android (the <scheme>://privacy link from PrivacyLinkActivity; the intent itself is checked
+# with adb, see docs/V3_LOG.md v3.1).
+- runFlow: subflows/launch.yaml
+- tapOn:
+    id: open-settings
+- scrollUntilVisible:
+    element:
+      id: open-privacy-settings
+- tapOn:
+    id: open-privacy-settings
+- assertVisible:
+    id: privacy-screen
+- assertVisible: "In short"
+- scrollUntilVisible:
+    element: "Apple Health and Health Connect (optional, off by default)"
+- scrollUntilVisible:
+    element:
+      id: privacy-close
+- tapOn:
+    id: privacy-close
+- scrollUntilVisible:
+    element:
+      id: open-about
+- tapOn:
+    id: open-about
+- scrollUntilVisible:
+    element:
+      id: open-privacy
+- assertVisible: ".*makes no network requests. Study links open your browser only when you tap one."
+- tapOn:
+    id: open-privacy
+- assertVisible:
+    id: privacy-screen
+- scrollUntilVisible:
+    element:
+      id: privacy-close
+- tapOn:
+    id: privacy-close
+- assertVisible:
+    id: about-screen
+- runFlow: subflows/launch.yaml
+
+# The link Health Connect's rationale screen ends up on (warm start).
+- openLink: ${APP_SCHEME}://privacy
+- runFlow:
+    when:
+      visible: "Open"
+    commands:
+      - tapOn: "Open"
+- extendedWaitUntil:
+    visible:
+      id: privacy-screen
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: privacy-close
+- tapOn:
+    id: privacy-close
+- extendedWaitUntil:
+    visible:
+      id: pattern-line
+    timeout: 10000

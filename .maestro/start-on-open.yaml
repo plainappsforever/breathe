@@ -1,0 +1,76 @@
+appId: ${APP_ID}
+name: Start when opened - with the setting on, a cold launch starts the default session with zero taps
+tags:
+  - smoke
+---
+# v3.1 F4 (REVIEW_V3 #9, SPEC section 1). Default off; this flow switches it off again at the end.
+- runFlow: subflows/launch.yaml
+- runFlow: subflows/fade-off.yaml
+- tapOn:
+    id: pattern-line
+- tapOn:
+    id: duration-1
+- tapOn:
+    id: pattern-slow
+- assertVisible: "Slow · 1 min"
+- tapOn:
+    id: open-settings
+- scrollUntilVisible:
+    element:
+      id: toggle-start-on-open
+- runFlow:
+    when:
+      visible:
+        id: toggle-start-on-open
+        checked: false
+    commands:
+      - tapOn:
+          id: toggle-start-on-open
+- assertVisible:
+    id: toggle-start-on-open
+    checked: true
+# Cold launch: no tap until the session is running.
+- runFlow: subflows/launch.yaml
+- extendedWaitUntil:
+    visible:
+      id: phase-label
+    timeout: 15000
+- tapOn:
+    id: phase-label
+- tapOn:
+    id: end
+- runFlow:
+    when:
+      visible:
+        id: done
+    commands:
+      - tapOn:
+          id: done
+- assertVisible:
+    id: pattern-line
+# Coming back to Home inside the same app run does not start another one (the setting is still on here).
+- tapOn:
+    id: open-settings
+- tapOn:
+    id: back
+- runScript:
+    file: scripts/sleep.js
+    env:
+      SLEEP_SECONDS: '3'
+- assertNotVisible:
+    id: phase-label
+- assertVisible:
+    id: pattern-line
+# Leave the setting at its default (off) for other flows.
+- tapOn:
+    id: open-settings
+- scrollUntilVisible:
+    element:
+      id: toggle-start-on-open
+- tapOn:
+    id: toggle-start-on-open
+- assertVisible:
+    id: toggle-start-on-open
+    checked: false
+- tapOn:
+    id: back

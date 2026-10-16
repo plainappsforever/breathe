@@ -1,0 +1,105 @@
+appId: ${APP_ID}
+name: Targets - minutes to 60, breath counts, end after this breath, get-ready countdown
+tags:
+  - smoke
+---
+- runFlow: subflows/launch.yaml
+- runFlow: subflows/fade-off.yaml
+
+# Minutes now go up to 60 and breath counts exist; both are remembered as the length.
+- tapOn:
+    id: pattern-line
+- tapOn:
+    id: duration-60
+- tapOn:
+    id: pattern-slow
+- assertVisible: "Slow · 60 min"
+- tapOn:
+    id: pattern-line
+- tapOn:
+    id: breaths-20
+- tapOn:
+    id: pattern-slow
+- assertVisible: "Slow · 20 breaths"
+
+# "End after this breath": an Open session, paused, then told to finish the breath. It ends by itself
+# at the next breath boundary (saved with an end screen if that is 20 s or more in, else Home directly).
+- tapOn:
+    id: pattern-line
+- tapOn:
+    id: duration-open
+# Box has a 16 s breath, so there is always a moment left for the note to show before it ends.
+- scrollUntilVisible:
+    element:
+      id: pattern-box
+- tapOn:
+    id: pattern-box
+- assertVisible: "Box · Open"
+- tapOn:
+    id: start
+- extendedWaitUntil:
+    visible:
+      id: phase-label
+    timeout: 5000
+- tapOn:
+    id: phase-label
+- assertVisible:
+    id: end-after-breath
+- tapOn:
+    id: end-after-breath
+- assertVisible:
+    id: ending-note
+- extendedWaitUntil:
+    notVisible:
+      id: ending-note
+    timeout: 20000
+- runFlow:
+    when:
+      visible:
+        id: done
+    commands:
+      - tapOn:
+          id: done
+- assertVisible:
+    id: pattern-line
+
+# Get-ready countdown: 3 s shows a number; tapping during it cancels back to Home.
+- tapOn:
+    id: open-settings
+- tapOn:
+    id: prep-10
+- assertVisible:
+    id: prep-10
+    selected: true
+- tapOn:
+    id: back
+- tapOn:
+    id: start
+- assertVisible:
+    id: prep-count
+- tapOn:
+    id: prep-count
+- assertVisible:
+    id: pattern-line
+- assertNotVisible:
+    id: phase-label
+
+# The countdown setting survives a restart. Restore the defaults (Off, Slow 3 min) afterwards.
+- stopApp
+- runFlow: subflows/launch.yaml
+- tapOn:
+    id: open-settings
+- assertVisible:
+    id: prep-10
+    selected: true
+- tapOn:
+    id: prep-0
+- tapOn:
+    id: back
+- tapOn:
+    id: pattern-line
+- tapOn:
+    id: duration-3
+- tapOn:
+    id: pattern-slow
+- assertVisible: "Slow · 3 min"

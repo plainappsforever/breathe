@@ -1,0 +1,83 @@
+appId: ${APP_ID}
+name: Home-screen widget - add it from Settings, minutes today, one tap starts the default session
+tags:
+  - android-only
+# The widget is placed through the launcher's own "Add to home screen" dialog; if one is already on the home
+# screen, Settings says so and no dialog appears.
+---
+- runFlow: subflows/launch.yaml
+- runFlow: subflows/fade-off.yaml
+- tapOn:
+    id: pattern-line
+- tapOn:
+    id: duration-3
+- scrollUntilVisible:
+    element:
+      id: pattern-slow
+- tapOn:
+    id: pattern-slow
+- assertVisible: "Slow · 3 min"
+- tapOn:
+    id: open-settings
+- scrollUntilVisible:
+    element:
+      id: add-widget
+    centerElement: true
+- tapOn:
+    id: add-widget
+- extendedWaitUntil:
+    visible:
+      text: "(?i)add to home screen|The Breathe widget is already.*"
+    timeout: 8000
+- runFlow:
+    when:
+      visible: "(?i)add to home screen"
+    commands:
+      - tapOn: "(?i)add to home screen"
+- pressKey: Home
+# The launcher may have put the widget on its second page (seen after an emulator cold boot, v3.1).
+- runFlow:
+    when:
+      notVisible: "\\d+ min today"
+    commands:
+      - swipe:
+          start: 90%,50%
+          end: 10%,50%
+- extendedWaitUntil:
+    visible: "\\d+ min today"
+    timeout: 10000
+
+# Tap the widget's button: the default session starts. Breathe 25 s and end: the session is saved and the
+# widget shows at least 1 minute today.
+- tapOn:
+    text: "Breathe"
+    retryTapIfNoChange: false
+- extendedWaitUntil:
+    visible:
+      id: phase-label
+    timeout: 20000
+- runScript:
+    file: scripts/sleep.js
+    env:
+      SLEEP_SECONDS: 25
+- tapOn:
+    id: phase-label
+- tapOn:
+    id: end
+- extendedWaitUntil:
+    visible:
+      id: end-screen
+    timeout: 10000
+- tapOn:
+    id: done
+- pressKey: Home
+- runFlow:
+    when:
+      notVisible: "\\d+ min today"
+    commands:
+      - swipe:
+          start: 90%,50%
+          end: 10%,50%
+- extendedWaitUntil:
+    visible: "[1-9]\\d* min today"
+    timeout: 10000

@@ -1,0 +1,82 @@
+appId: ${APP_ID}
+name: Quick actions - long-press the app icon, Breathe now and a recent pattern start a session
+tags:
+  - android-only
+# iOS: the same items were checked on SpringBoard with manual/ios-quick-actions.yaml (icon coordinates are
+# specific to the BreatheWell iPhone simulator's home screen, so it is not part of the suite).
+---
+# Absolute preconditions: Box was used once (so it is Recent), then Slow 3 min is the default.
+- runFlow: subflows/launch.yaml
+- runFlow: subflows/fade-off.yaml
+- tapOn:
+    id: pattern-line
+- tapOn:
+    id: duration-3
+- scrollUntilVisible:
+    element:
+      id: pattern-box
+- tapOn:
+    id: pattern-box
+- tapOn:
+    id: start
+- extendedWaitUntil:
+    visible:
+      id: phase-label
+    timeout: 15000
+- tapOn:
+    id: phase-label
+- tapOn:
+    id: end
+- tapOn:
+    id: pattern-line
+- tapOn:
+    id: duration-3
+- scrollUntilVisible:
+    element:
+      id: pattern-slow
+- tapOn:
+    id: pattern-slow
+- assertVisible: "Slow · 3 min"
+
+# "Breathe now" starts the default session (Slow 3 min) while the app is in the background.
+- runFlow:
+    file: subflows/quick-action.yaml
+    env:
+      ACTION: "Breathe now"
+- extendedWaitUntil:
+    visible:
+      id: phase-label
+    timeout: 20000
+- tapOn:
+    id: phase-label
+- tapOn:
+    id: end
+- assertVisible: "Slow · 3 min"
+
+# A recent pattern ("Box") starts that pattern. (A cold start from a quick action is checked on the Release
+# build: a development build first shows the Expo dev launcher, which drops the action; see V3_LOG P7.)
+- runFlow:
+    file: subflows/quick-action.yaml
+    env:
+      ACTION: "Box"
+- extendedWaitUntil:
+    visible:
+      id: phase-label
+    timeout: 20000
+- tapOn:
+    id: phase-label
+- tapOn:
+    id: end
+- assertVisible: "Box · 3 min"
+
+# Leave the default as the other flows expect it.
+- tapOn:
+    id: pattern-line
+- tapOn:
+    id: duration-3
+- scrollUntilVisible:
+    element:
+      id: pattern-slow
+- tapOn:
+    id: pattern-slow
+- assertVisible: "Slow · 3 min"

@@ -1,0 +1,23 @@
+appId: ${APP_ID}
+name: Patterns - choose a preset and duration, persists across restart
+tags:
+  - smoke
+---
+- runFlow: subflows/launch.yaml
+- tapOn:
+    id: pattern-line
+- assertVisible:
+    id: patterns-sheet
+- tapOn:
+    id: duration-3
+- scrollUntilVisible:
+    element:
+      id: pattern-box
+- tapOn:
+    id: pattern-box
+- assertVisible:
+    id: home-screen
+- assertVisible: "Box · 3 min"
+- stopApp
+- runFlow: subflows/launch.yaml
+- assertVisible: "Box · 3 min"

@@ -1,0 +1,64 @@
+appId: ${APP_ID}
+name: Manual - take the README screenshots (not part of the suite; run by hand, see docs/screenshots/v3)
+---
+# Usage: maestro --device <id> test -e APP_ID=<bundle id> --test-output-dir <dir> .maestro/manual/screenshots.yaml
+- launchApp:
+    stopApp: true
+- extendedWaitUntil:
+    visible:
+      id: home-screen
+    timeout: 60000
+- takeScreenshot: home
+- tapOn:
+    id: start
+- extendedWaitUntil:
+    visible:
+      id: phase-label
+    timeout: 20000
+- takeScreenshot: session
+- tapOn:
+    id: phase-label
+- tapOn:
+    id: end
+- tapOn:
+    id: pattern-line
+- takeScreenshot: patterns
+- scrollUntilVisible:
+    element:
+      id: info-box
+- tapOn:
+    id: info-box
+- takeScreenshot: pattern-detail
+- scrollUntilVisible:
+    element:
+      id: pattern-done
+- tapOn:
+    id: pattern-done
+- tapOn:
+    id: pattern-slow
+- tapOn:
+    id: open-settings
+- takeScreenshot: settings
+- scrollUntilVisible:
+    element:
+      id: open-reminders
+- takeScreenshot: settings-more
+- tapOn:
+    id: open-reminders
+- takeScreenshot: reminders
+- tapOn:
+    id: back
+- scrollUntilVisible:
+    element:
+      id: open-history
+- tapOn:
+    id: open-history
+- takeScreenshot: history
+- tapOn:
+    id: back
+- scrollUntilVisible:
+    element:
+      id: open-about
+- tapOn:
+    id: open-about
+- takeScreenshot: about

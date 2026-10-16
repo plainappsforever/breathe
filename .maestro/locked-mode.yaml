@@ -1,0 +1,86 @@
+appId: ${APP_ID}
+name: Locked mode - "Keep guiding when locked" on (Android native runner), pause, resume, end after this breath
+tags:
+  - smoke
+---
+# With the toggle on, Android hands every cue to the native session runner (D39) and the screen only
+# draws; iOS keeps the v1 background-audio path. Either way the session screen must behave exactly as
+# before. Cue timing while locked is measured with adb + logcat, not here (Maestro cannot lock).
+- runFlow: subflows/launch.yaml
+- runFlow: subflows/fade-off.yaml
+- tapOn:
+    id: open-settings
+- runFlow:
+    when:
+      visible:
+        id: toggle-lock-guidance
+        checked: false
+    commands:
+      - tapOn:
+          id: toggle-lock-guidance
+- assertVisible:
+    id: toggle-lock-guidance
+    checked: true
+- tapOn:
+    id: back
+- tapOn:
+    id: pattern-line
+- tapOn:
+    id: duration-1
+# Box (16 s breaths) leaves time for the "Ending after this breath" note to be seen below.
+- scrollUntilVisible:
+    element:
+      id: pattern-box
+- tapOn:
+    id: pattern-box
+- assertVisible: "Box · 1 min"
+
+- tapOn:
+    id: start
+# Box = 4 s in, 4 s hold: the screen keeps drawing phases while the runner plays the cues. (Waiting for
+# any phase label, not a particular word: a loaded machine can be seconds late to the first assertion.)
+- extendedWaitUntil:
+    visible:
+      id: phase-label
+    timeout: 8000
+- tapOn:
+    id: phase-label
+- assertVisible:
+    id: resume
+- tapOn:
+    id: resume
+- assertVisible:
+    id: phase-label
+- tapOn:
+    id: phase-label
+- tapOn:
+    id: end-after-breath
+- assertVisible:
+    id: ending-note
+- extendedWaitUntil:
+    notVisible:
+      id: ending-note
+    timeout: 15000
+- runFlow:
+    when:
+      visible:
+        id: done
+    commands:
+      - tapOn:
+          id: done
+- assertVisible:
+    id: pattern-line
+
+# Leave the toggle at its default (off) for other flows.
+- tapOn:
+    id: open-settings
+- runFlow:
+    when:
+      visible:
+        id: toggle-lock-guidance
+        checked: true
+    commands:
+      - tapOn:
+          id: toggle-lock-guidance
+- tapOn:
+    id: back

@@ -1,0 +1,198 @@
+appId: ${APP_ID}
+name: Data - export, backup, date-range and full delete, History lock is off by default
+tags:
+  - smoke
+---
+- runFlow: subflows/launch.yaml
+
+# One short session so there is something to export (Slow, 2 breaths = 20 s).
+- openLink: ${APP_SCHEME}://start?pattern=slow&target=b:2
+- runFlow:
+    when:
+      visible: "Open"
+    commands:
+      - tapOn: "Open"
+- extendedWaitUntil:
+    visible:
+      id: end-screen
+    timeout: 60000
+- tapOn:
+    id: done
+
+# The History lock defaults to off. On the Android emulator (no screen lock set up) it cannot be switched on and
+# says why; on the iOS simulator (which has a passcode) switching it on opens the system passcode prompt, which
+# a flow must not fill in, so only the default is checked there.
+- tapOn:
+    id: open-settings
+- scrollUntilVisible:
+    element:
+      id: toggle-history-lock
+- assertVisible:
+    id: toggle-history-lock
+    checked: false
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn:
+          id: toggle-history-lock
+      - assertVisible:
+          id: lock-note
+      - assertVisible:
+          id: toggle-history-lock
+          checked: false
+
+# Export and backup: the share sheet opens with the file; close it again.
+- scrollUntilVisible:
+    element:
+      id: open-data-settings
+- tapOn:
+    id: open-data-settings
+- assertVisible:
+    id: data-screen
+- tapOn:
+    id: export-csv
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible: "Save to Files"
+          timeout: 10000
+      - tapOn:
+          point: 50%,10%
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - extendedWaitUntil:
+          notVisible:
+            id: data-screen
+          timeout: 10000
+      - pressKey: back
+# (the share promise resolves after the sheet has closed)
+- extendedWaitUntil:
+    visible: ".*as CSV.*ready to share.*"
+    timeout: 10000
+- tapOn:
+    id: export-json
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible: "Save to Files"
+          timeout: 10000
+      - tapOn:
+          point: 50%,10%
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - extendedWaitUntil:
+          notVisible:
+            id: data-screen
+          timeout: 10000
+      - pressKey: back
+# (the share promise resolves after the sheet has closed)
+- extendedWaitUntil:
+    visible: ".*as JSON.*ready to share.*"
+    timeout: 10000
+- tapOn:
+    id: backup
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible: "Save to Files"
+          timeout: 10000
+      - tapOn:
+          point: 50%,10%
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - extendedWaitUntil:
+          notVisible:
+            id: data-screen
+          timeout: 10000
+      - pressKey: back
+# (the share promise resolves after the sheet has closed)
+- extendedWaitUntil:
+    visible: "Backup of everything:.*"
+    timeout: 10000
+
+# Delete a date range: bad dates are explained, an empty range deletes nothing.
+- scrollUntilVisible:
+    element:
+      id: range-from
+- tapOn:
+    id: range-from
+- inputText: "abc"
+- tapOn: "Delete"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - pressKey: Enter
+- tapOn:
+    id: range-check
+- assertVisible: "Write both dates.*"
+- scrollUntilVisible:
+    element:
+      id: range-from
+- tapOn:
+    id: range-from
+- eraseText: 10
+# (trailing space: the Android keyboard drops the last typed character when focus leaves; the app trims it)
+- inputText: "2000-01-01 "
+- tapOn: "Delete"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - pressKey: Enter
+- scrollUntilVisible:
+    element:
+      id: range-to
+- tapOn:
+    id: range-to
+- inputText: "2000-01-02 "
+- tapOn: "Delete"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - pressKey: Enter
+- scrollUntilVisible:
+    element:
+      id: range-check
+- tapOn:
+    id: range-check
+- assertVisible: "No sessions in that range."
+
+# Delete everything (second tap confirms); History is empty afterwards, settings stay.
+- scrollUntilVisible:
+    element:
+      id: delete-all
+- tapOn:
+    id: delete-all
+- assertVisible: "Tap again to delete all sessions"
+- tapOn:
+    id: delete-all
+- assertVisible: "Deleted .* sessions?\\..*"
+- scrollUntilVisible:
+    direction: UP
+    element:
+      id: back
+- tapOn:
+    id: back
+- assertVisible:
+    id: settings-screen
+- scrollUntilVisible:
+    element:
+      id: open-history
+- tapOn:
+    id: open-history
+- assertVisible: "No sessions yet."

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Widget start button: the app's accent blue, pill shaped. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#FF208AEF" />
+    <corners android:radius="22dp" />
+</shape>

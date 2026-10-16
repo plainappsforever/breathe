@@ -1,0 +1,95 @@
+appId: ${APP_ID}
+name: Health - off by default, turning it on asks (or explains and stays off), a finished session is written
+tags:
+  - smoke
+---
+# Maestro grants permissions at launch unless told otherwise; leave them all undecided so the real prompts show.
+- launchApp:
+    stopApp: true
+    permissions:
+      all: unset
+- extendedWaitUntil:
+    visible:
+      id: home-screen
+    timeout: 90000
+- tapOn:
+    id: open-settings
+# Scroll past it to the next section so the note that appears under the switch is on screen too.
+- scrollUntilVisible:
+    element:
+      id: toggle-history-lock
+- assertVisible:
+    id: toggle-health
+# Absolute precondition: off. (Off is also the default on a fresh install.)
+- runFlow:
+    when:
+      visible:
+        id: toggle-health
+        checked: true
+    commands:
+      - tapOn:
+          id: toggle-health
+- assertVisible:
+    id: toggle-health
+    checked: false
+
+# Turning it on asks the phone: iOS shows "Health Access" (Mindful Minutes, write only); Android shows the
+# Health Connect sheet (the first time also its "Get started" page). Each tap is optional because a
+# permission already given on an earlier run shows no sheet.
+- tapOn:
+    id: toggle-health
+- tapOn:
+    text: "Get started"
+    optional: true
+- tapOn:
+    text: "Turn On All"
+    optional: true
+# iOS 27: the Health Access sheet says "Select All 1 Topic" and Allow stays disabled until a topic is selected.
+- tapOn:
+    text: "Select All.*"
+    optional: true
+- tapOn:
+    text: "Allow all"
+    optional: true
+- tapOn:
+    text: "Allow"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: health-note
+    timeout: 15000
+- assertVisible:
+    id: toggle-health
+    checked: true
+- assertVisible: "Sessions from now on are saved to.*"
+
+# A finished session is written (the 2-breath Slow session is 20 s, the shortest that is saved).
+- tapOn:
+    id: back
+- assertVisible:
+    id: pattern-line
+- openLink: ${APP_SCHEME}://start?pattern=slow&target=b:2
+- runFlow:
+    when:
+      visible: "Open"
+    commands:
+      - tapOn: "Open"
+- extendedWaitUntil:
+    visible:
+      id: end-screen
+    timeout: 60000
+- assertVisible: "20 s · 2 breaths"
+- tapOn:
+    id: done
+
+# Back to the default: off.
+- tapOn:
+    id: open-settings
+- scrollUntilVisible:
+    element:
+      id: toggle-health
+- tapOn:
+    id: toggle-health
+- assertVisible:
+    id: toggle-health
+    checked: false

@@ -1,0 +1,16 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <application>
+    <!-- v3 P7.2: "Breathe" Quick Settings tile. A tap opens the app on the start link (the user's default
+         session). Not ACTIVE_TILE: the system binds it while the shade shows it, which is all it needs. -->
+    <service
+      android:name="expo.modules.quicktile.BreatheTileService"
+      android:exported="true"
+      android:icon="@drawable/breathe_ic_tile"
+      android:label="Breathe"
+      android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+      <intent-filter>
+        <action android:name="android.service.quicksettings.action.QS_TILE" />
+      </intent-filter>
+    </service>
+  </application>
+</manifest>

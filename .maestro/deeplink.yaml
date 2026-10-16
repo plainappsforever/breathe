@@ -1,0 +1,99 @@
+appId: ${APP_ID}
+name: Deep link - breathe://start opens a session, params and defaults
+tags:
+  - smoke
+---
+- runFlow: subflows/launch.yaml
+- runFlow: subflows/fade-off.yaml
+- tapOn:
+    id: pattern-line
+- tapOn:
+    id: pattern-slow
+- assertVisible:
+    id: pattern-line
+
+# Warm link with a 2-breath target: Slow 2 breaths = 20 s, saved and shown on the end screen.
+- openLink: ${APP_SCHEME}://start?pattern=slow&target=b:2
+- runFlow:
+    when:
+      visible: "Open"
+    commands:
+      - tapOn: "Open"
+- extendedWaitUntil:
+    visible:
+      id: phase-label
+    timeout: 8000
+- extendedWaitUntil:
+    visible:
+      id: end-screen
+    timeout: 45000
+- assertVisible: "20 s · 2 breaths"
+- tapOn:
+    id: done
+- assertVisible: "Slow · 2 breaths"
+
+# "start" alone runs the user's default (and an unknown pattern falls back to it). The default is set to
+# Slow 3 min first: after the link above it would be Slow 2 breaths (20 s), which can end before a slow,
+# loaded machine gets to the pause tap.
+- tapOn:
+    id: pattern-line
+- tapOn:
+    id: duration-3
+- scrollUntilVisible:
+    element:
+      id: pattern-slow
+- tapOn:
+    id: pattern-slow
+- assertVisible: "Slow · 3 min"
+- openLink: ${APP_SCHEME}://start?pattern=does-not-exist
+- runFlow:
+    when:
+      visible: "Open"
+    commands:
+      - tapOn: "Open"
+- extendedWaitUntil:
+    visible:
+      id: phase-label
+    timeout: 8000
+- tapOn:
+    id: phase-label
+- assertVisible:
+    id: end
+- tapOn:
+    id: end
+- assertVisible:
+    id: pattern-line
+
+# Cold link: the app is not running. A development build first shows the Expo dev launcher, which holds
+# the link until a server is picked; release builds go straight to the session.
+- stopApp
+- openLink: ${APP_SCHEME}://start?pattern=slow&target=m:1
+- runFlow:
+    when:
+      visible: "Open"
+    commands:
+      - tapOn: "Open"
+- runFlow:
+    when:
+      visible: "(?i)development servers"
+    commands:
+      - tapOn: "(?i)http://.*:8081"
+- extendedWaitUntil:
+    visible:
+      id: phase-label
+    timeout: 90000
+- tapOn:
+    id: phase-label
+- tapOn:
+    id: end
+- assertVisible:
+    id: pattern-line
+
+# Restore the default length for later flows.
+- tapOn:
+    id: pattern-line
+- tapOn:
+    id: duration-3
+- tapOn:
+    id: pattern-slow
+- assertVisible: "Slow · 3 min"

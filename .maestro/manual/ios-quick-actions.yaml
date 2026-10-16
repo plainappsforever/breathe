@@ -1,0 +1,99 @@
+appId: ${APP_ID}
+name: Manual - iOS quick actions on SpringBoard (not in the suite)
+# Run alone: maestro --device <udid> test -e APP_ID=com.tim.breathe.dev .maestro/manual/ios-quick-actions.yaml
+# Maestro longPressOn holds ~3 s, which puts SpringBoard into edit mode, so the press is a 1 s zero-length
+# swipe on the icon. 246,323 = "Breathe Well Dev" on page 2 of the BreatheWell iPhone simulator after the P7.4 widget was placed on it (read from the
+# Maestro hierarchy on 2026-09-30); change it if the home screen layout changes.
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: home-screen
+    timeout: 60000
+- runFlow:
+    when:
+      visible:
+        id: end
+    commands:
+      - tapOn:
+          id: end
+- pressKey: Home
+- waitForAnimationToEnd
+- pressKey: Home
+- waitForAnimationToEnd
+- swipe:
+    direction: LEFT
+- waitForAnimationToEnd
+- assertVisible: "Breathe Well Dev"
+- swipe:
+    start: 246,323
+    end: 246,323
+    duration: 1000
+- tapOn: "Breathe now.*"
+- extendedWaitUntil:
+    visible:
+      id: phase-label
+    timeout: 20000
+- tapOn:
+    id: phase-label
+- tapOn:
+    id: end
+- assertVisible: "Slow · 3 min"
+- pressKey: Home
+- waitForAnimationToEnd
+- pressKey: Home
+- waitForAnimationToEnd
+- swipe:
+    direction: LEFT
+- waitForAnimationToEnd
+- assertVisible: "Breathe Well Dev"
+- swipe:
+    start: 246,323
+    end: 246,323
+    duration: 1000
+- tapOn: "Box.*"
+- extendedWaitUntil:
+    visible:
+      id: phase-label
+    timeout: 20000
+- tapOn:
+    id: phase-label
+- tapOn:
+    id: end
+- assertVisible: "Box · 3 min"
+- stopApp
+- pressKey: Home
+- waitForAnimationToEnd
+- pressKey: Home
+- waitForAnimationToEnd
+- swipe:
+    direction: LEFT
+- waitForAnimationToEnd
+- assertVisible: "Breathe Well Dev"
+- swipe:
+    start: 246,323
+    end: 246,323
+    duration: 1000
+- tapOn: "Breathe now.*"
+- runFlow:
+    when:
+      visible: "(?i)development servers"
+    commands:
+      - tapOn: "(?i)http://.*:8081"
+- extendedWaitUntil:
+    visible:
+      id: phase-label
+    timeout: 60000
+- tapOn:
+    id: phase-label
+- tapOn:
+    id: end
+- tapOn:
+    id: pattern-line
+- tapOn:
+    id: duration-3
+- scrollUntilVisible:
+    element:
+      id: pattern-slow
+- tapOn:
+    id: pattern-slow

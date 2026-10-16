@@ -1,0 +1,24 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'expo.modules.sessionrunner'
+version = '0.1.0'
+
+android {
+  namespace "expo.modules.sessionrunner"
+  defaultConfig {
+    versionCode 1
+    versionName "0.1.0"
+  }
+  lintOptions {
+    abortOnError false
+  }
+}
+
+dependencies {
+  // Same media3 version expo-audio 57 already puts on the classpath (V3_PLAN "Pinned additions", P2).
+  implementation "androidx.media3:media3-session:1.9.0"
+  implementation "androidx.media3:media3-common:1.9.0"
+}

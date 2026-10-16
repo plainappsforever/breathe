@@ -1,0 +1,84 @@
+appId: ${APP_ID}
+name: Settings - toggles persist across restart
+tags:
+  - smoke
+---
+# v3.1: the Session section is taller, so Fade to dark (Session) and haptics / Sound (Guidance) are not on one
+# screen any more: each block scrolls to its own controls.
+- runFlow: subflows/launch.yaml
+- tapOn:
+    id: open-settings
+- assertVisible:
+    id: settings-screen
+# Ensure off (absolute, not a relative toggle, so this is correct regardless of leftover state).
+- runFlow:
+    when:
+      visible:
+        id: toggle-fade
+        checked: true
+    commands:
+      - tapOn:
+          id: toggle-fade
+- assertVisible:
+    id: toggle-fade
+    checked: false
+- scrollUntilVisible:
+    element:
+      id: toggle-sound
+    centerElement: true
+- tapOn:
+    id: haptics-off
+- assertVisible:
+    id: haptics-off
+    selected: true
+- runFlow:
+    when:
+      visible:
+        id: toggle-sound
+        checked: true
+    commands:
+      - tapOn:
+          id: toggle-sound
+- assertVisible:
+    id: toggle-sound
+    checked: false
+- stopApp
+- runFlow: subflows/launch.yaml
+- tapOn:
+    id: open-settings
+- assertVisible:
+    id: toggle-fade
+    checked: false
+- scrollUntilVisible:
+    element:
+      id: toggle-sound
+    centerElement: true
+- assertVisible:
+    id: haptics-off
+    selected: true
+- assertVisible:
+    id: toggle-sound
+    checked: false
+# Restore defaults for later runs and the owner's first launch.
+- tapOn:
+    id: haptics-on
+- runFlow:
+    when:
+      visible:
+        id: toggle-sound
+        checked: false
+    commands:
+      - tapOn:
+          id: toggle-sound
+- scrollUntilVisible:
+    element:
+      id: toggle-fade
+    direction: UP
+- runFlow:
+    when:
+      visible:
+        id: toggle-fade
+        checked: false
+    commands:
+      - tapOn:
+          id: toggle-fade

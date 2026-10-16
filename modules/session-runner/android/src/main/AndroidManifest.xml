@@ -1,0 +1,20 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <!-- Keeps the CPU running between cues while the screen is off (no runtime prompt). -->
+  <uses-permission android:name="android.permission.WAKE_LOCK" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <!-- The mediaPlayback type has no runtime prerequisite. No POST_NOTIFICATIONS: media-session
+       notifications are exempt, so the zero-prompt rule holds (V3_PLAN P2, D39). -->
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+  <!-- VIBRATE is already merged by expo-haptics. -->
+
+  <application>
+    <service
+      android:name="expo.modules.sessionrunner.SessionService"
+      android:exported="true"
+      android:foregroundServiceType="mediaPlayback">
+      <intent-filter>
+        <action android:name="androidx.media3.session.MediaSessionService" />
+      </intent-filter>
+    </service>
+  </application>
+</manifest>

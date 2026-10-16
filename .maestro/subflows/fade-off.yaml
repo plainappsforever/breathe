@@ -1,0 +1,17 @@
+appId: ${APP_ID}
+---
+# Fade to dark makes the next tap a wake-only tap; force it off so a single tap reliably pauses.
+- tapOn:
+    id: open-settings
+- runFlow:
+    when:
+      visible:
+        id: toggle-fade
+        checked: true
+    commands:
+      - tapOn:
+          id: toggle-fade
+- tapOn:
+    id: back
+- assertVisible:
+    id: pattern-line
