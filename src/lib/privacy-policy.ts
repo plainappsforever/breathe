@@ -4,13 +4,13 @@
 
 /**
  * OWNER: replace with the hosted policy's address (RELEASE_KIT section 9 recommends
- * https://taulon.org/breathe/privacy/). While it is the placeholder, the app hides the "Read it online" link.
+ * https://plainapps.dfdsfdsfsdf.workers.dev/apps/breathe/privacy). While it is the placeholder, the app hides the "Read it online" link.
  */
 export const PRIVACY_POLICY_URL = 'https://example.com/breathe-well/privacy';
 /** OWNER: provider line and date, as on the hosted page (RELEASE_KIT section 9: [DEVELOPER NAME], [POSTAL ADDRESS], [DATE]). */
 export const POLICY_PROVIDER = '[DEVELOPER NAME], [POSTAL ADDRESS]';
 export const POLICY_DATE = '[DATE]';
-export const POLICY_CONTACT = 'info@taulon.org';
+export const POLICY_CONTACT = 'plainapps@tuta.com';
 
 /** True while the URL above has not been filled in: the screen then shows the text only. */
 export function isPlaceholderPolicyUrl(url: string = PRIVACY_POLICY_URL): boolean {
