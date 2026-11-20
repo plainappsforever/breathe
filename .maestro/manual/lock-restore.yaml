@@ -4,7 +4,7 @@ name: History lock on - restoring a backup through the system file picker keeps 
 # Run by hand (not in the suite): it needs a device PIN and a backup file on the phone. Before:
 #   adb -s <serial> shell locksettings set-pin 1234
 #   adb -s <serial> push <a backup .json named breathe-lock-test-backup.json> /sdcard/Download/
-# Run: maestro --device <serial> test -e APP_ID=com.tim.breathe.dev .maestro/manual/lock-restore.yaml
+# Run: maestro --device <serial> test -e APP_ID=com.plainapps.breathe.dev .maestro/manual/lock-restore.yaml
 # After: switch the History lock off in Settings (PIN 1234), then
 #   adb -s <serial> shell locksettings clear --old 1234 ; adb -s <serial> shell rm /sdcard/Download/breathe-lock-test-backup.json
 # v3.1 F4 probe (REVIEW_V3 #10): History lock on (device PIN), Data > Restore opens the system picker, which sends

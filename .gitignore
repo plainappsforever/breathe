@@ -49,10 +49,7 @@ modules/*/ios/build/
 
 # Local artifacts (Maestro screenshots, logs)
 artifacts/
-keystore.properties
-*.keystore
-google-services.json
-GoogleService-Info.plist
-.env
-.env.*
-test/fixtures/real/
+
+# App Store Connect copyright line + review contact (personal data, never committed; scripts/asc-submit.py)
+scripts/asc-contact.local.json
+__pycache__/

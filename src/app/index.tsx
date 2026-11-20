@@ -1,15 +1,17 @@
 import { Link, useFocusEffect, useRouter } from 'expo-router';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { useSQLiteContext } from 'expo-sqlite';
+import { SymbolView } from 'expo-symbols';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, BackHandler, Platform, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { Easing, cancelAnimation, useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { HomeBackdrop } from '@/components/home-backdrop';
 import { BreathVisual, breathProgress, ORB_BIG, ORB_SMALL } from '@/components/breath-visual';
 import { MoodRow } from '@/components/mood-row';
 import { ThemedText } from '@/components/themed-text';
-import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { BrandFonts, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
 import { clearActiveSession, getActiveSession, saveActiveSession, type ActiveSession } from '@/db/active-session';
 import { getAppSettings, setBoolSetting, setPattern, setTarget, type AppSettings } from '@/db/app-settings';
 import { patternExists, resolvePatternById } from '@/db/custom-patterns';
@@ -38,6 +40,8 @@ import { evaluateActiveSession, GUIDED_HEARTBEAT_MS, savedOutcome, type Recovery
 import { syncSessionsToHealthIfOn } from '@/lib/health-runner';
 import { setSessionRunning } from '@/lib/reminder-notifications';
 import { SessionEndEvent, SessionEngine, SessionPhaseEvent } from '@/lib/session-engine';
+import { maybeAskForReview } from '@/lib/rating-prompt';
+import { waveSegments } from '@/lib/wave';
 import { leaveAction } from '@/lib/session-lifecycle';
 import { nativeRunnerFor, sessionRunnerModule, type RunnerActionEvent, type SessionRunner } from '@/lib/session-runner';
 import { targetPlannedSeconds } from '@/lib/session-schedule';
@@ -58,8 +62,8 @@ type ScreenPhase = 'idle' | 'settling' | 'running' | 'paused' | 'ended';
 
 function phaseWord(kind: Phase['kind']): string {
   if (kind === 'hold') return 'Hold';
-  if (kind === 'exhale') return 'Out';
-  return 'In';
+  if (kind === 'exhale') return 'Exhale';
+  return 'Inhale';
 }
 
 function formatClock(ms: number): string {
@@ -144,6 +148,8 @@ export default function HomeScreen() {
   const backRef = useRef<() => boolean>(() => false);
 
   const orbScale = useSharedValue(1);
+  /** Wave visual: position (0..1) along one breath; the dot travels the wave with it. */
+  const wavePos = useSharedValue(0);
   const orbOpacity = useSharedValue(1);
   const contentOpacity = useSharedValue(1);
 
@@ -469,8 +475,18 @@ export default function HomeScreen() {
     else audioTail.current = { cues, timer: setTimeout(finish, tailMs) };
   }
 
+  /** The wave dot moves in step with the phase (linear in time; the line itself carries the easing). */
+  function animateWaveForPhase(pattern: Pattern, phaseIndex: number, totalMs: number, elapsedInPhaseMs: number) {
+    const seg = waveSegments(pattern.phases)[phaseIndex];
+    if (!seg) return;
+    const done = totalMs > 0 ? Math.min(1, elapsedInPhaseMs / totalMs) : 1;
+    wavePos.value = seg.startFrac + (seg.endFrac - seg.startFrac) * done;
+    wavePos.value = withTiming(seg.endFrac, { duration: Math.max(0, totalMs - elapsedInPhaseMs), easing: Easing.linear });
+  }
+
   function animateOrbForPhase(pattern: Pattern, event: SessionPhaseEvent) {
     const { phase, phaseElapsedMs } = event;
+    animateWaveForPhase(pattern, event.phaseIndex, phase.seconds * 1000, phaseElapsedMs);
     if (phase.kind === 'hold') {
       // Normally a hold leaves the orb where it is; after a crash recovery it must be put there.
       if (phaseElapsedMs > 0) orbScale.value = holdScale(pattern, event.phaseIndex);
@@ -775,6 +791,7 @@ export default function HomeScreen() {
     setFinishing(false);
     setLive(null);
     orbScale.value = 1;
+    wavePos.value = 0;
     orbOpacity.value = 1;
     loadHome().catch(() => {});
   }
@@ -817,6 +834,7 @@ export default function HomeScreen() {
     const engine = engineRef.current;
     if (!engine || screenPhaseRef.current !== 'running') return;
     cancelAnimation(orbScale);
+    cancelAnimation(wavePos);
     engine.pause();
     if (!fromOutside) runnerRef.current?.pause();
     if (activeRef.current) {
@@ -864,6 +882,10 @@ export default function HomeScreen() {
     changeScreenPhase('running');
     poke();
     const remainingPhaseMs = currentPhaseEvent.phase.seconds * 1000 - (engine.getElapsedMs() - currentPhaseEvent.offsetMs);
+    if (remainingPhaseMs > 0) {
+      const seg = waveSegments(patternRef.current.phases)[currentPhaseEvent.phaseIndex];
+      if (seg) wavePos.value = withTiming(seg.endFrac, { duration: remainingPhaseMs, easing: Easing.linear });
+    }
     if (remainingPhaseMs > 0 && currentPhaseEvent.phase.kind !== 'hold') {
       const target = currentPhaseEvent.phase.kind === 'exhale' ? ORB_SMALL : ORB_BIG;
       orbScale.value = withTiming(target, { duration: remainingPhaseMs, easing: Easing.inOut(Easing.quad) });
@@ -891,6 +913,15 @@ export default function HomeScreen() {
   );
   const contentStyle = useAnimatedStyle(() => ({ opacity: contentOpacity.value }));
 
+  // Rating prompt: only on the summary screen, after real use (see lib/rating-prompt.ts); never during breathing.
+  useEffect(() => {
+    if (screenPhase !== 'ended') return;
+    const timer = setTimeout(() => {
+      maybeAskForReview(db).catch(() => {});
+    }, 1800);
+    return () => clearTimeout(timer);
+  }, [screenPhase, db]);
+
   const visual = view?.visual ?? 'orb';
   const largeText = view?.textScale === 'large';
   const showHomeChrome = screenPhase === 'idle';
@@ -899,7 +930,7 @@ export default function HomeScreen() {
   if (screenPhase === 'ended' && summary) {
     return (
       <View testID="end-screen" style={[styles.container, styles.endContainer, { backgroundColor: theme.background }]}>
-        <ThemedText type="title" style={styles.endTitle}>
+        <ThemedText type="title" style={[styles.endTitle, styles.endTitleBrand]}>
           {formatSessionSummary(summary.actualSeconds, summary.breaths)}
         </ThemedText>
         <ThemedText themeColor="textSecondary" style={styles.endPattern}>
@@ -925,17 +956,38 @@ export default function HomeScreen() {
       accessible={false}
       style={[styles.container, { backgroundColor: dimmed ? '#000000' : theme.background }]}
       onPress={handleScreenTap}>
+      {!dimmed && <HomeBackdrop />}
       <Animated.View style={[styles.content, contentStyle, styles.contentColumn, { paddingTop: insets.top + Spacing.two, paddingBottom: insets.bottom + Spacing.two }]}>
         {showHomeChrome && (
           <Link href="/settings" asChild>
-            <Pressable testID="open-settings" accessibilityLabel="Settings" hitSlop={12} style={styles.settingsButton}>
-              <ThemedText themeColor="tint">Settings</ThemedText>
+            <Pressable testID="open-settings" accessibilityRole="button" accessibilityLabel="Settings" hitSlop={12} style={styles.settingsButton}>
+              <SymbolView name="gearshape" size={24} tintColor={theme.tintText} fallback={<ThemedText themeColor="tint">Settings</ThemedText>} />
             </Pressable>
           </Link>
         )}
 
         <View style={styles.center}>
-          <Pressable testID="start" disabled={screenPhase !== 'idle'} onPress={() => startSession()} hitSlop={20}>
+          {visual === 'bar' && (
+            <View style={styles.waveWord}>
+              {showPhaseInfo && currentPhaseEvent && (
+                <ThemedText testID="phase-label" maxFontSizeMultiplier={1.4} style={[styles.waveWordText, largeText && styles.waveWordLarge]}>
+                  {phaseWord(currentPhaseEvent.phase.kind)}
+                </ThemedText>
+              )}
+              {screenPhase === 'settling' && prepLeft != null && (
+                <ThemedText testID="prep-count" style={styles.waveWordText}>
+                  {prepLeft}
+                </ThemedText>
+              )}
+            </View>
+          )}
+          <Pressable
+            testID="start"
+            accessibilityRole="button"
+            accessibilityLabel={`Begin ${patternRef.current.name}`}
+            disabled={screenPhase !== 'idle'}
+            onPress={() => startSession()}
+            hitSlop={20}>
             {visual === 'text' ? (
               <Animated.View testID="orb" style={[styles.wordBox, wordStyle]}>
                 <ThemedText
@@ -955,11 +1007,13 @@ export default function HomeScreen() {
                 trackColor={theme.backgroundSelected}
                 reduceMotion={reduceMotion}
                 resting={screenPhase === 'idle'}
+                phases={patternRef.current.phases}
+                wavePos={wavePos}
               />
             )}
           </Pressable>
 
-          {screenPhase === 'settling' && prepLeft != null && (
+          {screenPhase === 'settling' && prepLeft != null && visual !== 'bar' && (
             <ThemedText testID="prep-count" type="title" style={styles.phaseLabel}>
               {prepLeft}
             </ThemedText>
@@ -967,7 +1021,7 @@ export default function HomeScreen() {
 
           {showPhaseInfo && currentPhaseEvent && (
             <>
-              {visual !== 'text' && (
+              {visual !== 'text' && visual !== 'bar' && (
                 <ThemedText
                   testID="phase-label"
                   type="title"
@@ -976,7 +1030,7 @@ export default function HomeScreen() {
                   {phaseWord(currentPhaseEvent.phase.kind)}
                 </ThemedText>
               )}
-              <ThemedText testID="remaining" themeColor="textSecondary" style={styles.remaining}>
+              <ThemedText testID="remaining" themeColor="textSecondary" numeric style={styles.remaining}>
                 {remainingMs != null ? formatClock(remainingMs) : formatClock(elapsedMs)}
               </ThemedText>
               {finishing && (
@@ -999,7 +1053,7 @@ export default function HomeScreen() {
             )}
             {settings.moodCheckin && <MoodRow label="How are you feeling? (optional)" value={moodBefore} onChange={chooseMoodBefore} testIdPrefix="mood-before" />}
             <Pressable testID="pattern-line" onPress={() => router.push('/patterns')} hitSlop={12}>
-              <ThemedText type="smallBold">
+              <ThemedText style={styles.patternLine}>
                 {patternRef.current.name} · {targetLabel(settings.target)}
               </ThemedText>
             </Pressable>
@@ -1095,7 +1149,28 @@ const styles = StyleSheet.create({
     lineHeight: 96,
   },
   remaining: {
-    fontSize: 18,
+    fontSize: 17,
+  },
+  waveWord: {
+    minHeight: 48,
+    justifyContent: 'center',
+  },
+  waveWordText: {
+    fontFamily: BrandFonts.title,
+    fontWeight: '300',
+    fontSize: 28,
+    lineHeight: 40,
+    textAlign: 'center',
+  },
+  waveWordLarge: {
+    fontSize: 44,
+    lineHeight: 54,
+  },
+  patternLine: {
+    fontFamily: BrandFonts.title,
+    fontWeight: '300',
+    fontSize: 17,
+    lineHeight: 24,
   },
   footer: {
     alignItems: 'center',
@@ -1119,12 +1194,18 @@ const styles = StyleSheet.create({
   pauseButton: {
     minWidth: 120,
     minHeight: 48,
-    borderRadius: 12,
+    borderRadius: Radius.control,
     alignItems: 'center',
     justifyContent: 'center',
   },
   endTitle: {
     textAlign: 'center',
+  },
+  endTitleBrand: {
+    fontFamily: BrandFonts.title,
+    fontWeight: '300',
+    fontSize: 34,
+    lineHeight: 44,
   },
   endPattern: {
     textAlign: 'center',
@@ -1134,7 +1215,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.six,
     minWidth: 160,
     minHeight: 48,
-    borderRadius: 12,
+    borderRadius: Radius.control,
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',

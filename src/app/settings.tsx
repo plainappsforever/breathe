@@ -9,7 +9,7 @@ import { Slider } from '@/components/slider';
 import { StartOutsideSection } from '@/components/start-outside-section';
 import { ThemedText } from '@/components/themed-text';
 import { ToggleRow } from '@/components/toggle-row';
-import { ColumnStyle, Spacing } from '@/constants/theme';
+import { ColumnStyle, Radius, Spacing } from '@/constants/theme';
 import {
   END_SOUND_OPTIONS,
   FADE_DELAY_OPTIONS,
@@ -63,7 +63,7 @@ const FADE_DELAY_LABELS: { value: FadeDelay; label: string }[] = FADE_DELAY_OPTI
 const END_SOUND_LABELS: Record<EndSound, string> = { chime: 'Chime', bell: 'Bell', bowl: 'Bowl', none: 'None' };
 const END_SOUND_CHOICES = END_SOUND_OPTIONS.map((value) => ({ value, label: END_SOUND_LABELS[value] }));
 
-const VISUAL_LABELS: Record<VisualKind, string> = { orb: 'Orb', ring: 'Ring', bar: 'Bar', text: 'Text' };
+const VISUAL_LABELS: Record<VisualKind, string> = { orb: 'Orb', ring: 'Ring', bar: 'Wave', text: 'Text' };
 const VISUAL_CHOICES = VISUAL_OPTIONS.map((value) => ({ value, label: VISUAL_LABELS[value] }));
 
 const TEXT_SCALE_CHOICES: { value: AppSettings['textScale']; label: string }[] = [
@@ -204,7 +204,9 @@ export default function SettingsScreen() {
         style={{ backgroundColor: theme.background }}
         contentContainerStyle={[styles.content, ColumnStyle]}
         contentInsetAdjustmentBehavior="automatic">
-        <ThemedText type="smallBold">Session</ThemedText>
+        <ThemedText type="smallBold" themeColor="textSecondary" style={styles.sectionHead}>
+          Session
+        </ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
           Get ready countdown
         </ThemedText>
@@ -260,7 +262,7 @@ export default function SettingsScreen() {
           onChange={(v) => toggle('startOnOpen', v)}
         />
 
-        <ThemedText type="smallBold" style={styles.section}>
+        <ThemedText type="smallBold" themeColor="textSecondary" style={[styles.section, styles.sectionHead]}>
           Guidance
         </ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
@@ -307,7 +309,7 @@ export default function SettingsScreen() {
           </>
         )}
 
-        <ThemedText type="smallBold" style={styles.section}>
+        <ThemedText type="smallBold" themeColor="textSecondary" style={[styles.section, styles.sectionHead]}>
           Appearance
         </ThemedText>
         <Segmented options={THEME_OPTIONS} value={themePreference} onChange={chooseTheme} testIdPrefix="theme" />
@@ -347,19 +349,20 @@ export default function SettingsScreen() {
         </ThemedText>
         <Segmented options={TEXT_SCALE_CHOICES} value={settings.textScale} onChange={(v) => choose('textScale', v)} testIdPrefix="text" />
 
-        <ThemedText type="smallBold" style={styles.section}>
+        <ThemedText type="smallBold" themeColor="textSecondary" style={[styles.section, styles.sectionHead]}>
           Reminders
         </ThemedText>
         <Link href="/reminders" asChild>
-          <Pressable testID="open-reminders" style={StyleSheet.flatten([styles.linkRow, { backgroundColor: theme.backgroundElement }])}>
+          <Pressable testID="open-reminders" style={StyleSheet.flatten([styles.linkRow, { backgroundColor: theme.backgroundElement, borderColor: theme.border }])}>
             <ThemedText>Reminders</ThemedText>
+            <ThemedText themeColor="textSecondary">›</ThemedText>
           </Pressable>
         </Link>
         <ThemedText type="small" themeColor="textSecondary">
           None are set up until you add one. Your phone asks for permission only then.
         </ThemedText>
 
-        <ThemedText type="smallBold" style={styles.section}>
+        <ThemedText type="smallBold" themeColor="textSecondary" style={[styles.section, styles.sectionHead]}>
           Health
         </ThemedText>
         <ToggleRow
@@ -379,7 +382,7 @@ export default function SettingsScreen() {
           </ThemedText>
         )}
 
-        <ThemedText type="smallBold" style={styles.section}>
+        <ThemedText type="smallBold" themeColor="textSecondary" style={[styles.section, styles.sectionHead]}>
           Privacy &amp; data
         </ThemedText>
         <ToggleRow
@@ -409,29 +412,33 @@ export default function SettingsScreen() {
           onChange={(v) => toggle('milestones', v)}
         />
         <Link href="/data" asChild>
-          <Pressable testID="open-data-settings" style={StyleSheet.flatten([styles.linkRow, { backgroundColor: theme.backgroundElement }])}>
+          <Pressable testID="open-data-settings" style={StyleSheet.flatten([styles.linkRow, { backgroundColor: theme.backgroundElement, borderColor: theme.border }])}>
             <ThemedText>Export, back up or delete</ThemedText>
+            <ThemedText themeColor="textSecondary">›</ThemedText>
           </Pressable>
         </Link>
         <Link href="/privacy" asChild>
-          <Pressable testID="open-privacy-settings" style={StyleSheet.flatten([styles.linkRow, { backgroundColor: theme.backgroundElement }])}>
+          <Pressable testID="open-privacy-settings" style={StyleSheet.flatten([styles.linkRow, { backgroundColor: theme.backgroundElement, borderColor: theme.border }])}>
             <ThemedText>Privacy policy</ThemedText>
+            <ThemedText themeColor="textSecondary">›</ThemedText>
           </Pressable>
         </Link>
 
         <StartOutsideSection />
 
-        <ThemedText type="smallBold" style={styles.section}>
+        <ThemedText type="smallBold" themeColor="textSecondary" style={[styles.section, styles.sectionHead]}>
           More
         </ThemedText>
         <Link href="/history" asChild>
-          <Pressable testID="open-history" style={StyleSheet.flatten([styles.linkRow, { backgroundColor: theme.backgroundElement }])}>
+          <Pressable testID="open-history" style={StyleSheet.flatten([styles.linkRow, { backgroundColor: theme.backgroundElement, borderColor: theme.border }])}>
             <ThemedText>History</ThemedText>
+            <ThemedText themeColor="textSecondary">›</ThemedText>
           </Pressable>
         </Link>
         <Link href="/about" asChild>
-          <Pressable testID="open-about" style={StyleSheet.flatten([styles.linkRow, { backgroundColor: theme.backgroundElement }])}>
+          <Pressable testID="open-about" style={StyleSheet.flatten([styles.linkRow, { backgroundColor: theme.backgroundElement, borderColor: theme.border }])}>
             <ThemedText>About</ThemedText>
+            <ThemedText themeColor="textSecondary">›</ThemedText>
           </Pressable>
         </Link>
 
@@ -463,7 +470,7 @@ const styles = StyleSheet.create({
   accent: {
     width: 48,
     height: 48,
-    borderRadius: 24,
+    borderRadius: Radius.card,
     borderWidth: 2,
     borderColor: 'transparent',
     alignItems: 'center',
@@ -474,10 +481,18 @@ const styles = StyleSheet.create({
     height: 28,
     borderRadius: 14,
   },
+  sectionHead: {
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    fontSize: 13,
+  },
   linkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: StyleSheet.hairlineWidth,
     minHeight: 48,
-    borderRadius: 12,
+    borderRadius: Radius.control,
     paddingHorizontal: Spacing.three,
-    justifyContent: 'center',
   },
 });

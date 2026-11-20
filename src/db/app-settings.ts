@@ -73,7 +73,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   endSound: 'chime',
   fadeToDark: true,
   fadeDelay: 5,
-  visual: 'orb',
+  visual: 'bar',
   reduceMotion: 'system',
   textScale: 'default',
   accent: DEFAULT_ACCENT,

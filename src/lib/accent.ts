@@ -1,12 +1,14 @@
 import { useSyncExternalStore } from 'react';
 
-/** Five accent colours (V3 P3). Blue is the v1 look. Each is chosen for at least 4.5:1 against the page background. */
+import { Brand } from '@/constants/theme';
+
+/** Five accent colours (V3 P3). The first ('blue' is the stored key of v1) is now the brand's dusk indigo (R1, 2026-11). Each is chosen for at least 4.5:1 against the page background. */
 export type AccentKey = 'blue' | 'teal' | 'green' | 'violet' | 'rose';
 
 export const ACCENTS: Record<AccentKey, { label: string; light: string; dark: string }> = {
-  blue: { label: 'Blue', light: '#0A6BD8', dark: '#4DA3FF' },
+  blue: { label: 'Dusk', light: Brand.light.accent, dark: Brand.dark.accent },
   teal: { label: 'Teal', light: '#0B7A75', dark: '#4FD1C5' },
-  green: { label: 'Green', light: '#2E7D32', dark: '#7BD88F' },
+  green: { label: 'Green', light: '#2A7A2E', dark: '#7BD88F' },
   violet: { label: 'Violet', light: '#6A4CC7', dark: '#B79CFF' },
   rose: { label: 'Rose', light: '#C2185B', dark: '#FF8FB3' },
 };

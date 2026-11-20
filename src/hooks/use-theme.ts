@@ -13,5 +13,6 @@ export function useTheme() {
   const accent = useAccent();
   const theme = scheme === 'unspecified' ? 'light' : scheme;
 
-  return { ...Colors[theme], tint: ACCENTS[accent][theme] };
+  const chosen = ACCENTS[accent][theme];
+  return { ...Colors[theme], tint: chosen, tintText: chosen };
 }

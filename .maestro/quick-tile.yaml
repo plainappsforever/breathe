@@ -4,7 +4,7 @@ tags:
   - android-only
 # Android 13+. If the tile is already in Quick Settings, the system answers "already added" and no dialog
 # appears. To see the dialog again: adb -s <serial> shell cmd statusbar remove-tile \
-#   com.tim.breathe.dev/expo.modules.quicktile.BreatheTileService
+#   com.plainapps.breathe.dev/expo.modules.quicktile.BreatheTileService
 ---
 - runFlow: subflows/launch.yaml
 - runFlow: subflows/fade-off.yaml

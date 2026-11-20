@@ -1,15 +1,29 @@
 import type { ConfigContext, ExpoConfig } from 'expo/config';
 
+import brand from './src/constants/brand.json';
+
+// D24: splash and Android icon background come from the app's identity file, never a literal here.
+const IDENTITY = {
+  splash: { light: brand.light.background, dark: brand.dark.background },
+  iconBackground: brand.light.accent,
+};
+
 // One codebase, three installable variants that can sit side by side on a device.
 // Select with APP_VARIANT (set by scripts/native.sh and eas.json).
 const VARIANTS = {
-  development: { name: 'Breathe Well Dev', id: 'com.tim.breathe.dev', scheme: 'breathe-dev' },
-  preview: { name: 'Breathe Well Preview', id: 'com.tim.breathe.preview', scheme: 'breathe-preview' },
-  production: { name: 'Breathe Well', id: 'com.tim.breathe', scheme: 'breathe' },
+  development: { name: 'Breathe Well Dev', id: 'com.plainapps.breathe.dev', scheme: 'breathe-dev' },
+  preview: { name: 'Breathe Well Preview', id: 'com.plainapps.breathe.preview', scheme: 'breathe-preview' },
+  production: { name: 'Breathe Well', id: 'com.plainapps.breathe', scheme: 'breathe' },
 } as const;
 
 type Variant = keyof typeof VARIANTS;
 
+// Store build part B (2026-11-07): a Release build of Xcode (expo-constants' "Generate app.config" phase runs this file with
+// CONFIGURATION=Release) without APP_VARIANT would embed the DEVELOPMENT config (scheme breathe-dev) in an App Store
+// binary. Refuse instead of defaulting (copied from loyalty-cards D54); scripts/check-variant.sh reads the result back.
+if (process.env.APP_VARIANT === undefined && /^release/i.test(process.env.CONFIGURATION ?? '')) {
+  throw new Error('APP_VARIANT is not set in a Release build. Prefix the command with APP_VARIANT=production (or preview), see docs/RELEASE_KIT.md.');
+}
 const variant = (process.env.APP_VARIANT ?? 'development') as Variant;
 if (!(variant in VARIANTS)) {
   throw new Error(`Unknown APP_VARIANT "${variant}". Use development, preview or production.`);
@@ -31,11 +45,16 @@ const plugins: NonNullable<ExpoConfig['plugins']> = [
   // v3.1 F2: Health Connect's privacy-policy links open the in-app policy (must run after react-native-health-connect's mod).
   './plugins/with-health-rationale.js',
   'expo-router',
-  ['expo-splash-screen', { backgroundColor: '#00897B', image: './assets/images/splash-icon.png', imageWidth: 76 }],
+  ['expo-splash-screen', {
+      backgroundColor: IDENTITY.splash.light,
+      dark: { backgroundColor: IDENTITY.splash.dark },
+      image: './assets/images/splash-icon.png',
+      imageWidth: 76,
+    }],
   'expo-sqlite',
   // v3 P6 reminders (D50). The notification permission is asked only when the first reminder is added.
   // Icon: 96x96 white on transparent (Android status bar); no push, so no background-remote-notification mode.
-  ['expo-notifications', { icon: './assets/images/notification-icon.png', color: '#208AEF' }],
+  ['expo-notifications', { icon: './assets/images/notification-icon.png', color: IDENTITY.iconBackground }],
   // v3 P6 Health, write-only (D51). iOS: HealthKit entitlement, Mindful Minutes; `background: false` because
   // background delivery (reading) is on by default in the library. Android: Health Connect, minSdk 26.
   [
@@ -68,6 +87,13 @@ const plugins: NonNullable<ExpoConfig['plugins']> = [
 ];
 
 if (widgetsEnabled) {
+  // Registered BEFORE expo-widgets (Xcode mods run last-registered-first, so the extension target exists when they run):
+  // the extension gets the app's Apple team (expo writes DEVELOPMENT_TEAM only on the app target; safe-share lesson) and
+  // release compiler settings (-O, no debug dylib; expo-widgets writes its Debug settings into Release too, interval-timer P8).
+  plugins.push(
+    ['./plugins/with-extension-team.js', { appleTeamId, targetName: 'ExpoWidgetsTarget' }],
+    './plugins/with-widget-release-settings.js',
+  );
   plugins.push([
     'expo-widgets',
     {
@@ -102,13 +128,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name,
   slug: 'breathe',
-  version: '1.0.0',
+  version: '1.1.0',
   orientation: 'default',
   icon: './assets/images/icon.png',
   scheme,
   userInterfaceStyle: 'automatic',
   ios: {
     bundleIdentifier: id,
+    buildNumber: '3',
     ...(appleTeamId ? { appleTeamId } : {}),
     // App Store Connect export compliance: only the system's own HTTPS (none in the app), no custom encryption.
     config: { usesNonExemptEncryption: false },
@@ -127,7 +154,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   android: {
     package: id,
     adaptiveIcon: {
-      backgroundColor: '#E6F4FE',
+      backgroundColor: IDENTITY.iconBackground,
       foregroundImage: './assets/images/android-icon-foreground.png',
       backgroundImage: './assets/images/android-icon-background.png',
       monochromeImage: './assets/images/android-icon-monochrome.png',

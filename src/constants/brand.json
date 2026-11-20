@@ -1,0 +1,30 @@
+{
+  "_doc": "The app's identity (D24). Sheet 9 (Breathe Well) in tasks-and-reports/DESIGN_IDENTITIES.md. Field guide: mobile-starter/docs/DESIGN_TOKENS.md. Read by src/constants/theme.ts (screens) and app.config.ts (splash, Android icon background).",
+  "light": {
+    "accent": "#4B57A6",
+    "onAccent": "#FFFFFF",
+    "accentText": "#4B57A6",
+    "background": "#EEF0F5",
+    "surface": "#FFFFFF",
+    "border": "#D6D8DC"
+  },
+  "dark": {
+    "accent": "#9EA8F0",
+    "onAccent": "#16181A",
+    "accentText": "#9EA8F0",
+    "background": "#1B1E26",
+    "surface": "#2B2E35",
+    "border": "#3D4047"
+  },
+  "fonts": {
+    "title": "serif",
+    "body": "sans",
+    "numerals": "serif"
+  },
+  "radius": {
+    "control": 14,
+    "card": 24
+  },
+  "card": "flat",
+  "density": "airy"
+}

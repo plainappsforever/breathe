@@ -128,7 +128,7 @@ tags:
     id: fav-long-exhale
 - assertNotVisible: "Favourites"
 
-# New presets run: Short sigh (1.5 in, 0.5 sip, 4 out) reaches "Out" in about two seconds.
+# New presets run: Short sigh (1.5 in, 0.5 sip, 4 out) reaches "Exhale" in about two seconds.
 - scrollUntilVisible:
     element:
       id: pattern-short-sigh
@@ -142,7 +142,7 @@ tags:
       id: phase-label
     timeout: 8000
 - extendedWaitUntil:
-    visible: "Out"
+    visible: "Exhale"
     timeout: 8000
 - tapOn:
     id: phase-label

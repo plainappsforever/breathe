@@ -251,7 +251,7 @@ tags:
     visible:
       id: phase-label
     timeout: 8000
-- assertVisible: "In"
+- assertVisible: "Inhale"
 - tapOn:
     id: phase-label
 - tapOn:

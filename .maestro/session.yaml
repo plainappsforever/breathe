@@ -31,8 +31,8 @@ tags:
 - stopApp
 - runFlow: subflows/launch.yaml
 
-# Acceptance 4 + 10: cold launch to "In" is exactly one tap, no dialog or system sheet anywhere.
-# Pausing right after "In" (rather than also waiting to observe "Out") keeps this comfortably under
+# Acceptance 4 + 10: cold launch to "Inhale" is exactly one tap, no dialog or system sheet anywhere.
+# Pausing right after "Inhale" (rather than also waiting to observe "Exhale") keeps this comfortably under
 # the 20s save threshold on a loaded simulator; phase advancement itself is covered by
 # session-engine.test.ts and by full-session.yaml running a session to completion.
 - tapOn:
@@ -41,7 +41,7 @@ tags:
     visible:
       id: phase-label
     timeout: 5000
-- assertVisible: "In"
+- assertVisible: "Inhale"
 - tapOn:
     id: phase-label
 - assertVisible:

@@ -7,7 +7,7 @@ import { BackButton } from '@/components/back-button';
 import { LockGate } from '@/components/lock-gate';
 import { Segmented } from '@/components/segmented';
 import { ThemedText } from '@/components/themed-text';
-import { ColumnStyle, Spacing } from '@/constants/theme';
+import { ColumnStyle, Radius, Spacing } from '@/constants/theme';
 import { getAppSettings } from '@/db/app-settings';
 import { listAllSessions, type SessionRecord } from '@/db/sessions';
 import { useTheme } from '@/hooks/use-theme';
@@ -296,9 +296,17 @@ function HistoryContent() {
       keyExtractor={(item) => String(item.id)}
       ListHeaderComponent={header}
       ListEmptyComponent={
-        <ThemedText testID="history-empty" themeColor="textSecondary" style={styles.empty}>
-          {empty ? 'No sessions yet.' : 'No sessions match.'}
-        </ThemedText>
+        <View style={styles.emptyBlock}>
+          {empty && (
+            <View style={styles.restingLine}>
+              <View style={[styles.restingRule, { backgroundColor: theme.tint }]} />
+              <View style={[styles.restingDot, { backgroundColor: theme.tint }]} />
+            </View>
+          )}
+          <ThemedText testID="history-empty" themeColor="textSecondary" style={styles.empty}>
+            {empty ? 'No sessions yet. Your first one appears here when it ends.' : 'No sessions match.'}
+          </ThemedText>
+        </View>
       }
       ListFooterComponent={
         <Link href="/data" asChild>
@@ -363,7 +371,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.two,
   },
   card: {
-    borderRadius: 12,
+    borderRadius: Radius.card,
     padding: Spacing.three,
     gap: Spacing.one,
   },
@@ -419,7 +427,7 @@ const styles = StyleSheet.create({
   },
   search: {
     minHeight: 44,
-    borderRadius: 12,
+    borderRadius: Radius.control,
     paddingHorizontal: Spacing.three,
     fontSize: 16,
   },
@@ -430,7 +438,7 @@ const styles = StyleSheet.create({
   },
   chip: {
     minHeight: 36,
-    borderRadius: 18,
+    borderRadius: 999,
     paddingHorizontal: Spacing.three,
     alignItems: 'center',
     justifyContent: 'center',
@@ -444,16 +452,37 @@ const styles = StyleSheet.create({
   },
   empty: {
     textAlign: 'center',
+    marginTop: Spacing.three,
+  },
+  emptyBlock: {
     marginTop: Spacing.five,
   },
+  // Empty History: a flat line across the screen with the dot resting at its start.
+  restingLine: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  restingDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    position: 'absolute',
+    left: 0,
+  },
+  restingRule: {
+    flex: 1,
+    height: 3,
+    borderRadius: 2,
+    opacity: 0.6,
+  },
   row: {
-    borderRadius: 12,
+    borderRadius: Radius.card,
     padding: Spacing.three,
     gap: Spacing.one,
   },
   linkRow: {
     minHeight: 48,
-    borderRadius: 12,
+    borderRadius: Radius.control,
     paddingHorizontal: Spacing.three,
     justifyContent: 'center',
     marginTop: Spacing.three,

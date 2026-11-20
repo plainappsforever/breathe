@@ -6,11 +6,12 @@ import { Linking, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-
 import { BackButton } from '@/components/back-button';
 import { Button } from '@/components/button';
 import { ThemedText } from '@/components/themed-text';
-import { ColumnStyle, Spacing } from '@/constants/theme';
+import { ColumnStyle, Radius, Spacing } from '@/constants/theme';
 import { listCustomPatterns, toPattern } from '@/db/custom-patterns';
 import { addReminder, deleteReminder, listReminders, updateReminder } from '@/db/reminders';
 import { useTheme } from '@/hooks/use-theme';
 import { PRESETS, type Pattern } from '@/lib/patterns';
+import { withTimeout } from '@/lib/with-timeout';
 import {
   canRemindExactly,
   getPermission,
@@ -36,6 +37,10 @@ import {
   type Reminder,
 } from '@/lib/reminders';
 
+/** How long a screen waits for the phone's notification service before it shows its controls anyway. */
+const NOTIFICATION_WAIT_MS = 3000;
+const PERMISSION_UNKNOWN = { state: 'undetermined' as PermissionState, canAskAgain: true, unknown: true };
+
 async function countText(): Promise<string> {
   const { reminders, snoozes } = await pendingCounts();
   return `scheduled: ${reminders} snoozed: ${snoozes}`;
@@ -53,26 +58,28 @@ export default function RemindersScreen() {
   const [reminders, setReminders] = useState<Reminder[] | null>(null);
   const [patterns, setPatterns] = useState<Pattern[]>([...PRESETS]);
   const [editing, setEditing] = useState<number | null>(null);
-  const [permission, setPermission] = useState<{ state: PermissionState; canAskAgain: boolean }>({ state: 'undetermined', canAskAgain: true });
+  const [permission, setPermission] = useState<{ state: PermissionState; canAskAgain: boolean; unknown?: boolean }>({ state: 'undetermined', canAskAgain: true, unknown: true });
   const [exact, setExact] = useState(true);
   const [note, setNote] = useState('');
   const [scheduled, setScheduled] = useState<string | null>(null);
   const syncTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const refresh = useCallback(async () => {
-    const [list, custom, perm] = await Promise.all([listReminders(db), listCustomPatterns(db), getPermission()]);
+    // The screen shows as soon as the database answers; the phone's notification service never gates it.
+    const [list, custom] = await Promise.all([listReminders(db), listCustomPatterns(db)]);
     setReminders(list);
     setPatterns([...PRESETS, ...custom.map(toPattern)]);
-    setPermission(perm);
     setExact(canRemindExactly());
-    if (__DEV__) setScheduled(await countText());
+    const perm = await withTimeout(getPermission(), NOTIFICATION_WAIT_MS, PERMISSION_UNKNOWN);
+    setPermission(perm);
+    if (__DEV__) setScheduled(await withTimeout(countText(), NOTIFICATION_WAIT_MS, null));
   }, [db]);
 
   const syncNow = useCallback(async () => {
     if (syncTimer.current) clearTimeout(syncTimer.current);
     syncTimer.current = null;
-    await syncReminders(db).catch(() => 0);
-    if (__DEV__) setScheduled(await countText().catch(() => null));
+    await withTimeout(syncReminders(db), NOTIFICATION_WAIT_MS, 0);
+    if (__DEV__) setScheduled(await withTimeout(countText(), NOTIFICATION_WAIT_MS, null));
   }, [db]);
 
   /** Changes reach the phone's schedule shortly after the last tap (steppers can be tapped quickly). */
@@ -109,10 +116,15 @@ export default function RemindersScreen() {
   async function add() {
     setNote('');
     // The first reminder is the moment the permission is asked (never earlier, never on launch).
-    let perm = await getPermission();
-    if (perm.state !== 'granted' && (perm.state === 'undetermined' || perm.canAskAgain)) {
+    let perm: { state: PermissionState; canAskAgain: boolean; unknown?: boolean } = await withTimeout(
+      getPermission(),
+      NOTIFICATION_WAIT_MS,
+      PERMISSION_UNKNOWN
+    );
+    if (perm.state !== 'granted' && !perm.unknown && (perm.state === 'undetermined' || perm.canAskAgain)) {
+      // The system sheet waits for the person, so no timeout here; only the re-read afterwards is bounded.
       await requestPermission();
-      perm = await getPermission();
+      perm = await withTimeout(getPermission(), NOTIFICATION_WAIT_MS, PERMISSION_UNKNOWN);
     }
     const id = await addReminder(db, { ...DEFAULT_REMINDER_TIME, weekdays: [], patternId: null, enabled: true });
     if (id === null) {
@@ -140,7 +152,7 @@ export default function RemindersScreen() {
 
   async function allowNotifications() {
     if (permission.state === 'undetermined' || permission.canAskAgain) {
-      await requestPermission();
+      await withTimeout(requestPermission(), 60000, false);
       await refresh();
       await syncNow();
     } else {
@@ -150,12 +162,11 @@ export default function RemindersScreen() {
 
   async function test() {
     setNote('');
-    await sendTestReminder(5);
-    setNote('A test reminder will arrive in about 5 seconds.');
+    const sent = await withTimeout(sendTestReminder(5).then(() => true), NOTIFICATION_WAIT_MS, false);
+    setNote(sent ? 'A test reminder will arrive in about 5 seconds.' : 'The phone did not answer. Try the test reminder again in a moment.');
   }
 
-  if (!reminders) return null;
-  const anyEnabled = reminders.some((r) => r.enabled);
+  const anyEnabled = (reminders ?? []).some((r) => r.enabled);
 
   return (
     <>
@@ -176,7 +187,19 @@ export default function RemindersScreen() {
           </ThemedText>
         )}
 
-        {anyEnabled && permission.state !== 'granted' && (
+        {reminders === null && (
+          <ThemedText testID="reminders-loading" type="small" themeColor="textSecondary">
+            Loading your reminders…
+          </ThemedText>
+        )}
+
+        {permission.unknown && reminders !== null && (
+          <ThemedText testID="perm-unknown" type="small" themeColor="textSecondary">
+            Checking whether notifications are allowed… If your phone does not answer, you can still add reminders here.
+          </ThemedText>
+        )}
+
+        {anyEnabled && !permission.unknown && permission.state !== 'granted' && (
           <View testID="perm-banner" style={[styles.banner, { backgroundColor: theme.backgroundElement }]}>
             <ThemedText type="small">
               {permission.state === 'undetermined' || permission.canAskAgain
@@ -206,13 +229,13 @@ export default function RemindersScreen() {
           </View>
         )}
 
-        {reminders.length === 0 && (
+        {reminders !== null && reminders.length === 0 && (
           <ThemedText testID="reminders-empty" themeColor="textSecondary">
             No reminders.
           </ThemedText>
         )}
 
-        {reminders.map((reminder) => {
+        {(reminders ?? []).map((reminder) => {
           const open = editing === reminder.id;
           const patternName = reminder.patternId ? (patterns.find((p) => p.id === reminder.patternId)?.name ?? 'Default pattern') : 'Default pattern';
           return (
@@ -339,16 +362,16 @@ export default function RemindersScreen() {
         <Button
           testID="add-reminder"
           label="Add a reminder"
-          disabled={reminders.length >= MAX_REMINDERS}
+          disabled={reminders === null || reminders.length >= MAX_REMINDERS}
           onPress={() => add().catch(() => setNote('Could not add the reminder.'))}
         />
-        {reminders.length >= MAX_REMINDERS && (
+        {reminders !== null && reminders.length >= MAX_REMINDERS && (
           <ThemedText type="small" themeColor="textSecondary">
             That is the most reminders ({MAX_REMINDERS}).
           </ThemedText>
         )}
 
-        {reminders.length > 0 && permission.state === 'granted' && (
+        {reminders !== null && reminders.length > 0 && permission.state === 'granted' && (
           <Button testID="test-reminder" variant="secondary" label="Send a test reminder" onPress={() => test().catch(() => {})} />
         )}
         {note !== '' && (
@@ -394,15 +417,15 @@ function PatternChip({ testID, label, selected, onPress }: { testID: string; lab
 
 const styles = StyleSheet.create({
   content: { padding: Spacing.three, gap: Spacing.three },
-  banner: { borderRadius: 12, padding: Spacing.three, gap: Spacing.two },
-  card: { borderRadius: 12, padding: Spacing.three, gap: Spacing.three },
+  banner: { borderRadius: Radius.card, padding: Spacing.three, gap: Spacing.two },
+  card: { borderRadius: Radius.card, padding: Spacing.three, gap: Spacing.three },
   cardHead: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
   cardTitle: { flex: 1, minHeight: 48, justifyContent: 'center' },
   editor: { gap: Spacing.two },
   stepRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one, flexWrap: 'wrap' },
-  step: { minWidth: 44, minHeight: 44, borderRadius: 10, alignItems: 'center', justifyContent: 'center', paddingHorizontal: Spacing.two },
+  step: { minWidth: 44, minHeight: 44, borderRadius: Radius.control, alignItems: 'center', justifyContent: 'center', paddingHorizontal: Spacing.two },
   stepValue: { minWidth: 40, textAlign: 'center' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   dayChip: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
-  patternChip: { minHeight: 40, borderRadius: 20, paddingHorizontal: Spacing.three, justifyContent: 'center' },
+  patternChip: { minHeight: 40, borderRadius: 999, paddingHorizontal: Spacing.three, justifyContent: 'center' },
 });

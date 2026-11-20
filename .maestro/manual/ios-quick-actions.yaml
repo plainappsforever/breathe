@@ -1,6 +1,6 @@
 appId: ${APP_ID}
 name: Manual - iOS quick actions on SpringBoard (not in the suite)
-# Run alone: maestro --device <udid> test -e APP_ID=com.tim.breathe.dev .maestro/manual/ios-quick-actions.yaml
+# Run alone: maestro --device <udid> test -e APP_ID=com.plainapps.breathe.dev .maestro/manual/ios-quick-actions.yaml
 # Maestro longPressOn holds ~3 s, which puts SpringBoard into edit mode, so the press is a 1 s zero-length
 # swipe on the icon. 246,323 = "Breathe Well Dev" on page 2 of the BreatheWell iPhone simulator after the P7.4 widget was placed on it (read from the
 # Maestro hierarchy on 2026-09-30); change it if the home screen layout changes.

@@ -7,7 +7,7 @@ import { Button } from '@/components/button';
 import { BackButton } from '@/components/back-button';
 import { LockGate } from '@/components/lock-gate';
 import { ThemedText } from '@/components/themed-text';
-import { ColumnStyle, Spacing } from '@/constants/theme';
+import { ColumnStyle, Radius, Spacing } from '@/constants/theme';
 import { patternExists } from '@/db/custom-patterns';
 import { deleteSession, getSession, listAllSessions, updateSessionNote, type SessionRecord } from '@/db/sessions';
 import { useTheme } from '@/hooks/use-theme';
@@ -230,14 +230,14 @@ const styles = StyleSheet.create({
   },
   note: {
     minHeight: 96,
-    borderRadius: 12,
+    borderRadius: Radius.card,
     padding: Spacing.three,
     fontSize: 16,
     textAlignVertical: 'top',
   },
   field: {
     minHeight: 44,
-    borderRadius: 12,
+    borderRadius: Radius.control,
     paddingHorizontal: Spacing.three,
     fontSize: 16,
   },
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
   },
   chip: {
     minHeight: 36,
-    borderRadius: 18,
+    borderRadius: 999,
     paddingHorizontal: Spacing.three,
     alignItems: 'center',
     justifyContent: 'center',

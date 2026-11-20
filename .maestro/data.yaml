@@ -195,4 +195,4 @@ tags:
       id: open-history
 - tapOn:
     id: open-history
-- assertVisible: "No sessions yet."
+- assertVisible: "No sessions yet. Your first one appears here when it ends."

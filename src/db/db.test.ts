@@ -128,7 +128,7 @@ describe('session experience settings (v3 P3)', () => {
       volume: 1,
       endSound: 'chime',
       fadeDelay: 5,
-      visual: 'orb',
+      visual: 'bar',
       reduceMotion: 'system',
       textScale: 'default',
       accent: 'blue',
@@ -173,7 +173,7 @@ describe('session experience settings (v3 P3)', () => {
     await setSetting(db, 'fadeDelay', '7');
     await setSetting(db, 'visual', 'cube');
     await setSetting(db, 'accent', 'plaid');
-    expect(await getAppSettings(db)).toMatchObject({ hapticStrength: 0.45, volume: 1, endSound: 'chime', fadeDelay: 5, visual: 'orb', accent: 'blue' });
+    expect(await getAppSettings(db)).toMatchObject({ hapticStrength: 0.45, volume: 1, endSound: 'chime', fadeDelay: 5, visual: 'bar', accent: 'blue' });
   });
 
   it('reads v1 haptics values: Gentle is on at 0.45, Strong is on at 0.9, and a saved slider value wins', async () => {

@@ -1,0 +1,21 @@
+appId: ${APP_ID}
+name: Manual - App Store screenshots, part A, the running session (Release build, Fade to dark off in the database; part B is store-shots-b.yaml, see docs/V1_LOG.md "Store screenshots")
+---
+# Usage: maestro --device <id> test -e APP_ID=com.plainapps.breathe --test-output-dir <dir> .maestro/manual/store-shots.yaml
+- launchApp:
+    stopApp: true
+- extendedWaitUntil:
+    visible:
+      id: home-screen
+    timeout: 60000
+- tapOn:
+    id: start
+- extendedWaitUntil:
+    visible:
+      id: phase-label
+    timeout: 20000
+- extendedWaitUntil:
+    visible: "no such text, waits about 3 s for the orb to grow"
+    timeout: 1200
+    optional: true
+- takeScreenshot: 01-session

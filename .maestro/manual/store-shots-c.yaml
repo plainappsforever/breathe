@@ -1,0 +1,43 @@
+appId: ${APP_ID}
+name: Manual - App Store screenshots, part C, Settings (top, nothing cut off) and Reminders with one reminder (run by hand)
+---
+# Usage: maestro --device <id> test -e APP_ID=com.plainapps.breathe --test-output-dir <dir> .maestro/manual/store-shots-c.yaml
+- launchApp:
+    stopApp: true
+    permissions:
+      notifications: allow
+- tapOn:
+    text: Cancel
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: home-screen
+    timeout: 60000
+- tapOn:
+    id: open-settings
+- extendedWaitUntil:
+    visible:
+      id: settings-screen
+    timeout: 10000
+- takeScreenshot: 05-settings-top
+- scrollUntilVisible:
+    element:
+      id: open-reminders
+- tapOn:
+    id: open-reminders
+- extendedWaitUntil:
+    visible:
+      id: add-reminder
+    timeout: 10000
+- tapOn:
+    id: add-reminder
+- tapOn:
+    text: Allow
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "reminder-[0-9]+"
+    timeout: 10000
+- tapOn:
+    id: "reminder-[0-9]+"
+- takeScreenshot: 06-reminders

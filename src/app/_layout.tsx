@@ -1,9 +1,10 @@
 import * as Notifications from 'expo-notifications';
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider, useRootNavigationState, useRouter } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider, useRootNavigationState, useRouter, type Theme } from 'expo-router';
 import { SQLiteProvider, useSQLiteContext, type SQLiteDatabase } from 'expo-sqlite';
 import { useEffect, useRef } from 'react';
 import { AppState, useColorScheme } from 'react-native';
 
+import { BrandFonts, Colors } from '@/constants/theme';
 import { migrateLegacyCustomPattern } from '@/db/custom-patterns';
 import { migrate } from '@/db/migrations';
 import { getAllSettings, getThemePreference } from '@/db/settings';
@@ -36,6 +37,24 @@ export default function RootLayout() {
     </SQLiteProvider>
   );
 }
+
+// D24: header, back button and screen backgrounds follow the brand tokens instead of React Navigation's iOS blue.
+function navigationTheme(dark: boolean): Theme {
+  const base = dark ? DarkTheme : DefaultTheme;
+  const c = Colors[dark ? 'dark' : 'light'];
+  const font = (f: Theme['fonts']['regular']) => ({ ...f, fontFamily: BrandFonts.title });
+  return {
+    ...base,
+    colors: { ...base.colors, primary: c.tintText, background: c.background, card: c.background, text: c.text, border: c.border },
+    fonts: {
+      regular: font(base.fonts.regular),
+      medium: font(base.fonts.medium),
+      bold: font(base.fonts.bold),
+      heavy: font(base.fonts.heavy),
+    },
+  };
+}
+const NAV_THEMES = { light: navigationTheme(false), dark: navigationTheme(true) };
 
 type Router = ReturnType<typeof useRouter>;
 
@@ -103,7 +122,7 @@ function Navigator() {
   useQuickActionStarts();
   useWidgetRefreshOnLeave();
   return (
-    <ThemeProvider value={scheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={NAV_THEMES[scheme === 'dark' ? 'dark' : 'light']}>
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false, title: 'Home' }} />
         <Stack.Screen name="start" options={{ headerShown: false, animation: 'none' }} />

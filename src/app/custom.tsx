@@ -5,7 +5,7 @@ import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native
 
 import { Button } from '@/components/button';
 import { ThemedText } from '@/components/themed-text';
-import { ColumnStyle, Spacing } from '@/constants/theme';
+import { ColumnStyle, Radius, Spacing } from '@/constants/theme';
 import { setPattern } from '@/db/app-settings';
 import { createCustomPattern, deleteCustomPattern, duplicateCustomPattern, getCustomPattern, updateCustomPattern } from '@/db/custom-patterns';
 import { useTheme } from '@/hooks/use-theme';
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
   },
   nameInput: {
     minHeight: 48,
-    borderRadius: 12,
+    borderRadius: Radius.control,
     paddingHorizontal: Spacing.three,
     fontSize: 16,
   },
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
   stepperControl: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 12,
+    borderRadius: Radius.control,
   },
   stepperButton: {
     width: 44,

@@ -117,7 +117,7 @@ tags:
       id: phase-label
     timeout: 8000
 - extendedWaitUntil:
-    visible: "Out"
+    visible: "Exhale"
     timeout: 8000
 - runScript:
     file: scripts/sleep.js

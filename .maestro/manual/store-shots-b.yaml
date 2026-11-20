@@ -1,0 +1,56 @@
+appId: ${APP_ID}
+name: Manual - App Store screenshots, part B, patterns / settings / history / about a pattern (run by hand, see docs/V1_LOG.md "Store screenshots")
+---
+# Usage: maestro --device <id> test -e APP_ID=com.plainapps.breathe --test-output-dir <dir> .maestro/manual/store-shots-b.yaml
+- launchApp:
+    stopApp: true
+- tapOn:
+    text: Cancel
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: home-screen
+    timeout: 60000
+- tapOn:
+    id: pattern-line
+- extendedWaitUntil:
+    visible:
+      id: patterns-sheet
+    timeout: 10000
+- takeScreenshot: 02-patterns
+- tapOn:
+    id: pattern-slow
+- tapOn:
+    id: open-settings
+- scrollUntilVisible:
+    element:
+      id: open-reminders
+- swipe:
+    start: 50%, 72%
+    end: 50%, 48%
+- takeScreenshot: 05-settings
+- scrollUntilVisible:
+    element:
+      id: open-history
+- tapOn:
+    id: open-history
+- extendedWaitUntil:
+    visible:
+      id: history-screen
+    timeout: 10000
+- takeScreenshot: 03-history
+- tapOn: Back
+- tapOn: Home
+- tapOn:
+    id: pattern-line
+- extendedWaitUntil:
+    visible:
+      id: patterns-sheet
+    timeout: 10000
+- tapOn:
+    id: info-long-exhale
+- extendedWaitUntil:
+    visible:
+      id: pattern-detail
+    timeout: 10000
+- takeScreenshot: 04-about-pattern

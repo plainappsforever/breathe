@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { Spacing } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 /** A row of mutually exclusive choices. Each button's testID is `${testIdPrefix}-${value}`. */
@@ -40,13 +40,13 @@ export function Segmented<T extends string | number>({
 const styles = StyleSheet.create({
   segmented: {
     flexDirection: 'row',
-    borderRadius: 12,
+    borderRadius: Radius.control,
     padding: Spacing.one,
   },
   segment: {
     flex: 1,
     minHeight: 40,
-    borderRadius: 9,
+    borderRadius: Radius.inner,
     alignItems: 'center',
     justifyContent: 'center',
   },

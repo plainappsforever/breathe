@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Platform, Pressable, StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { Spacing } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 import QuickTile from '../../modules/quick-tile/src/QuickTileModule';
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
   },
   linkRow: {
     minHeight: 48,
-    borderRadius: 12,
+    borderRadius: Radius.control,
     paddingHorizontal: Spacing.three,
     justifyContent: 'center',
   },

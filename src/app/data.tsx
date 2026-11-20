@@ -7,7 +7,7 @@ import { Button } from '@/components/button';
 import { BackButton } from '@/components/back-button';
 import { LockGate } from '@/components/lock-gate';
 import { ThemedText } from '@/components/themed-text';
-import { ColumnStyle, Spacing } from '@/constants/theme';
+import { ColumnStyle, Radius, Spacing } from '@/constants/theme';
 import { syncReminders } from '@/lib/reminder-notifications';
 import { createBackup, readExportSessions, restoreBackup } from '@/db/backup';
 import { countSessionsBetween, deleteAllSessions, deleteSessionsBetween } from '@/db/sessions';
@@ -282,12 +282,12 @@ const styles = StyleSheet.create({
   },
   input: {
     minHeight: 48,
-    borderRadius: 12,
+    borderRadius: Radius.control,
     paddingHorizontal: Spacing.three,
     fontSize: 16,
   },
   box: {
-    borderRadius: 12,
+    borderRadius: Radius.card,
     padding: Spacing.three,
     gap: Spacing.two,
   },

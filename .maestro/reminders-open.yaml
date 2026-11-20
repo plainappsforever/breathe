@@ -1,0 +1,29 @@
+appId: ${APP_ID}
+name: Reminders opens and shows its controls at once, even when the phone's notification service never answers
+tags:
+  - smoke
+---
+- launchApp:
+    stopApp: true
+    permissions:
+      notifications: unset
+- extendedWaitUntil:
+    visible:
+      id: home-screen
+    timeout: 90000
+- tapOn:
+    id: open-settings
+- scrollUntilVisible:
+    element:
+      id: open-reminders
+- tapOn:
+    id: open-reminders
+- extendedWaitUntil:
+    visible:
+      id: reminders-screen
+    timeout: 5000
+# The add button is there without any permission answer (the screen never waits on notifications).
+- extendedWaitUntil:
+    visible:
+      id: add-reminder
+    timeout: 5000

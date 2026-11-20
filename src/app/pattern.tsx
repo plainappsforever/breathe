@@ -6,7 +6,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Segmented } from '@/components/segmented';
 import { ThemedText } from '@/components/themed-text';
-import { ColumnStyle, Spacing } from '@/constants/theme';
+import { ColumnStyle, Radius, Spacing } from '@/constants/theme';
 import { getAppSettings, setTarget } from '@/db/app-settings';
 import { getCustomPattern } from '@/db/custom-patterns';
 import { getPatternPrefs, setPatternOverride, setPatternTarget, type PatternPrefs } from '@/db/pattern-prefs';
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
   done: {
     marginTop: Spacing.four,
     minHeight: 48,
-    borderRadius: 12,
+    borderRadius: Radius.control,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
   chip: {
     minHeight: 40,
     paddingHorizontal: Spacing.three,
-    borderRadius: 20,
+    borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
   },

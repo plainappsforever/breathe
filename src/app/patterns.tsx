@@ -1,10 +1,12 @@
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import { SymbolView } from 'expo-symbols';
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
+import { MiniWave } from '@/components/mini-wave';
 import { ThemedText } from '@/components/themed-text';
-import { ColumnStyle, Spacing } from '@/constants/theme';
+import { BrandFonts, ColumnStyle, Radius, Spacing } from '@/constants/theme';
 import { getAppSettings, setPattern, setTarget, type AppSettings } from '@/db/app-settings';
 import { listCustomPatterns, toPattern, type CustomPatternRecord } from '@/db/custom-patterns';
 import {
@@ -142,11 +144,14 @@ export default function PatternsScreen() {
           accessibilityState={{ selected }}
           onPress={() => choosePattern(pattern.id)}
           style={styles.rowMain}>
-          <ThemedText type={selected ? 'smallBold' : 'default'}>{pattern.name}</ThemedText>
+          <ThemedText type={selected ? 'smallBold' : 'default'} style={styles.rowName}>
+            {pattern.name}
+          </ThemedText>
           <ThemedText type="small" themeColor="textSecondary">
             {details}
           </ThemedText>
         </Pressable>
+        <MiniWave phases={pattern.phases} />
         {custom && (
           <Pressable
             testID={`edit-${pattern.id}`}
@@ -165,7 +170,12 @@ export default function PatternsScreen() {
           hitSlop={8}
           onPress={() => toggleFavorite(pattern.id)}
           style={styles.infoButton}>
-          <ThemedText themeColor={favorite ? 'tint' : 'textSecondary'}>{favorite ? '★' : '☆'}</ThemedText>
+          <SymbolView
+            name={favorite ? 'star.fill' : 'star'}
+            size={20}
+            tintColor={favorite ? theme.tintText : theme.textSecondary}
+            fallback={<ThemedText themeColor={favorite ? 'tint' : 'textSecondary'}>{favorite ? '★' : '☆'}</ThemedText>}
+          />
         </Pressable>
         <Pressable
           testID={`info-${pattern.id}`}
@@ -271,6 +281,7 @@ export default function PatternsScreen() {
 }
 
 const styles = StyleSheet.create({
+  rowName: { fontFamily: BrandFonts.title },
   content: {
     padding: Spacing.three,
     gap: Spacing.two,
@@ -286,7 +297,7 @@ const styles = StyleSheet.create({
   },
   search: {
     minHeight: 44,
-    borderRadius: 12,
+    borderRadius: Radius.control,
     paddingHorizontal: Spacing.three,
     fontSize: 16,
   },
@@ -298,14 +309,14 @@ const styles = StyleSheet.create({
   chip: {
     minHeight: 40,
     paddingHorizontal: Spacing.three,
-    borderRadius: 20,
+    borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 12,
+    borderRadius: Radius.card,
     minHeight: 56,
   },
   rowMain: {
